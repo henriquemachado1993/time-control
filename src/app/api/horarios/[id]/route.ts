@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // PUT - Atualizar horário
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -24,6 +24,7 @@ export async function PUT(
     }
 
     const { date, start_time, end_time, description } = await request.json();
+    const { id } = await params;
 
     if (!date || !start_time || !end_time) {
       return NextResponse.json({ error: "Data, entrada e saída são obrigatórios" }, { status: 400 });
@@ -31,7 +32,7 @@ export async function PUT(
 
     // Verificar se o horário pertence ao usuário
     const existingHorario = await prisma.work_hours.findFirst({
-      where: { id: params.id, user_id: user.id }
+      where: { id, user_id: user.id }
     });
 
     if (!existingHorario) {
@@ -39,7 +40,7 @@ export async function PUT(
     }
 
     const horario = await prisma.work_hours.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         date: new Date(date),
         start_time,
@@ -58,7 +59,7 @@ export async function PUT(
 // DELETE - Excluir horário
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -75,9 +76,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
+    const { id } = await params;
+
     // Verificar se o horário pertence ao usuário
     const existingHorario = await prisma.work_hours.findFirst({
-      where: { id: params.id, user_id: user.id }
+      where: { id, user_id: user.id }
     });
 
     if (!existingHorario) {
@@ -85,7 +88,7 @@ export async function DELETE(
     }
 
     await prisma.work_hours.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Horário excluído com sucesso" });

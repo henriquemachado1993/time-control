@@ -3,6 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Tipo para a cláusula where da busca
+type WhereClause = {
+  user_id: string;
+  date?: Date;
+  description?: {
+    contains: string;
+    mode: 'insensitive';
+  };
+};
+
 // GET - Listar horários do usuário com busca opcional por data
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +34,7 @@ export async function GET(request: NextRequest) {
     const searchDate = searchParams.get('date');
     const searchDescription = searchParams.get('description');
 
-    const whereClause: any = { user_id: user.id };
+    const whereClause: WhereClause = { user_id: user.id };
     
     if (searchDate) {
       whereClause.date = new Date(searchDate);

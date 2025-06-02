@@ -181,7 +181,7 @@ export default function DashboardPage() {
         const error = await response.json();
         setFormError(error.error || "Erro ao salvar horário");
       }
-    } catch (error) {
+    } catch (_error) {
       setFormError("Erro ao salvar horário");
     }
   };
@@ -201,7 +201,7 @@ export default function DashboardPage() {
       } else {
         setFormError("Erro ao excluir horário");
       }
-    } catch (error) {
+    } catch (_error) {
       setFormError("Erro ao excluir horário");
     }
   };

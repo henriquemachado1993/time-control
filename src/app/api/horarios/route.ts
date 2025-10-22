@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Tipo para a cláusula where da busca
 type WhereClause = {
   user_id: string;
-  date?: Date;
+  date?: string;
   description?: {
     contains: string;
     mode: 'insensitive';
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const whereClause: WhereClause = { user_id: user.id };
     
     if (searchDate) {
-      whereClause.date = new Date(searchDate);
+      whereClause.date = searchDate;
     }
 
     if (searchDescription) {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const horario = await prisma.work_hours.create({
       data: {
         user_id: user.id,
-        date: new Date(date),
+        date,
         start_time,
         end_time,
         description: description || null,

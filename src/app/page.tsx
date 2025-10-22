@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -19,10 +21,15 @@ export default function HomePage() {
   }, [session, status, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Carregando...</p>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center">
+          <Clock className="h-12 w-12 animate-pulse" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32 mx-auto" />
+          <Skeleton className="h-4 w-24 mx-auto" />
+        </div>
       </div>
     </div>
   );

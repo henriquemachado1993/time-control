@@ -42,7 +42,7 @@ export async function PUT(
     const horario = await prisma.work_hours.update({
       where: { id },
       data: {
-        date: new Date(date),
+        date,
         start_time,
         end_time,
         description: description || null,

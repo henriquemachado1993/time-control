@@ -26,6 +26,30 @@ model work_hours {
   @@index([user_id, date])
 }
 
+model extra_hours_bank {
+  id           String   @id @default(cuid())
+  user_id      String
+  total_hours  Float    // Total de horas extras disponíveis em horas decimais
+  description  String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @updatedAt
+
+  @@index([user_id])
+}
+
+model extra_hours_usage {
+  id           String   @id @default(cuid())
+  user_id      String
+  bank_id      String   // Referência ao banco de horas extras
+  date         String   // Data em que foi utilizada
+  hours_used   Float    // Horas utilizadas em formato decimal
+  description  String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, date])
+  @@index([bank_id])
+}
+
 model User {
   id            String   @id @default(cuid())
   name          String?

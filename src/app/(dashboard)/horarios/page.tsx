@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +15,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { DateTimePicker, DatePicker } from "@/components/ui/date-picker";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Clock, LogOut, Plus, Search, Calendar, Edit, Trash2, User, Settings } from "lucide-react";
+import { Calendar, Plus, Search, Edit, Trash2, Clock } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-type User = any; // Assuming 'any' is the correct type for User
+type User = any;
 type WorkHour = {
   id: string;
   date: string;
@@ -71,7 +68,7 @@ function calculateTotalDay(workHours: WorkHour[]) {
   return `${h}h ${m}min`;
 }
 
-export default function DashboardPage() {
+export default function HorariosPage() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -136,10 +133,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) fetchHorarios();
   }, [user]);
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
-  };
 
   const openModal = (workHour?: WorkHour) => {
     if (workHour) {
@@ -269,260 +262,217 @@ export default function DashboardPage() {
   const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b">
-        <div className="flex h-16 items-center px-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-6 w-6" />
-              <h1 className="text-xl font-bold">Controle de Horas</h1>
-            </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Mensagens */}
+      {success && (
+        <Alert className="mb-6">
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Controles de busca */}
+      <div className="flex flex-col space-y-4 mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Registros de Horas</h2>
+            <p className="text-muted-foreground">
+              Gerencie e visualize seus registros de trabalho
+            </p>
           </div>
-          <div className="ml-auto flex items-center space-x-4">
-            <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Perfil</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configurações</span>
-                </DropdownMenuItem>
-                <Separator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sair</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button onClick={() => openModal()}>
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Registro
+          </Button>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mensagens */}
-        {success && (
-          <Alert className="mb-6">
-            <AlertDescription>{success}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Controles de busca */}
-        <div className="flex flex-col space-y-4 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">Registros de Horas</h2>
-              <p className="text-muted-foreground">
-                Gerencie e visualize seus registros de trabalho
-              </p>
-            </div>
-            <Button onClick={() => openModal()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Registro
-            </Button>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Filtros
-              </CardTitle>
-              <CardDescription>
-                Filtre seus registros por data ou descrição
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DatePicker
-                    date={searchDate}
-                    onDateChange={setSearchDate}
-                    label="Buscar por data"
-                    placeholder="Selecionar data"
-                    className="w-full"
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Filtros
+            </CardTitle>
+            <CardDescription>
+              Filtre seus registros por data ou descrição
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DatePicker
+                  date={searchDate}
+                  onDateChange={setSearchDate}
+                  label="Buscar por data"
+                  placeholder="Selecionar data"
+                  className="w-full"
+                />
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Search className="w-4 h-4" />
+                    Buscar por descrição
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="Digite parte da descrição..."
+                    value={searchDescription}
+                    onChange={(e) => setSearchDescription(e.target.value)}
                   />
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Search className="w-4 h-4" />
-                      Buscar por descrição
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="Digite parte da descrição..."
-                      value={searchDescription}
-                      onChange={(e) => setSearchDescription(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 justify-end">
-                  <Button onClick={handleSearch}>
-                    <Search className="w-4 h-4 mr-2" />
-                    Buscar
-                  </Button>
-                  <Button variant="outline" onClick={clearSearch}>
-                    Limpar
-                  </Button>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button onClick={handleSearch}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Buscar
+                </Button>
+                <Button variant="outline" onClick={clearSearch}>
+                  Limpar
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Lista de horários com paginação */}
+      <div className="space-y-6">
+        {listLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : diasPaginados.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Clock className="w-24 h-24 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground text-lg">Nenhum horário encontrado</p>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Lista de horários com paginação */}
-        <div className="space-y-6">
-          {listLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
+        ) : (
+          <>
+            {diasPaginados.map(([data, horariosData]) => (
+              <Card key={data}>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5" />
+                        {dayjs(data).format("DD/MM/YYYY")} - {dayjs(data).format("dddd")}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 mt-2">
+                        <Clock className="w-4 h-4" />
+                        Total do dia: <span className="font-semibold">{calculateTotalDay(horariosData)}</span>
+                      </CardDescription>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : diasPaginados.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Clock className="w-24 h-24 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground text-lg">Nenhum horário encontrado</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {diasPaginados.map(([data, horariosData]) => (
-                <Card key={data}>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Calendar className="w-5 h-5" />
-                          {dayjs(data).format("DD/MM/YYYY")} - {dayjs(data).format("dddd")}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-1 mt-2">
-                          <Clock className="w-4 h-4" />
-                          Total do dia: <span className="font-semibold">{calculateTotalDay(horariosData)}</span>
-                        </CardDescription>
-                      </div>
-                      <Badge variant="secondary">
-                        {horariosData.length} registro{horariosData.length !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Entrada</TableHead>
-                          <TableHead>Saída</TableHead>
-                          <TableHead>Total</TableHead>
-                          <TableHead className="hidden md:table-cell">Descrição</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {horariosData.map((horario) => (
-                          <TableRow key={horario.id}>
-                            <TableCell className="font-medium">{horario.start_time}</TableCell>
-                            <TableCell className="font-medium">{horario.end_time}</TableCell>
-                            <TableCell className="font-bold">
-                              {calculateTotalHours(horario.start_time, horario.end_time)}
-                            </TableCell>
-                            <TableCell className="max-w-xs truncate hidden md:table-cell">
-                              {horario.description || "—"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => openModal(horario)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDelete(horario.id)}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {/* Paginação */}
-              {totalPaginas > 1 && (
-                <div className="flex items-center justify-center space-x-2 py-4">
-                  <Button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Anterior
-                  </Button>
-
-                  <div className="flex space-x-1">
-                    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                      >
-                        {page}
-                      </Button>
-                    ))}
+                    <Badge variant="secondary">
+                      {horariosData.length} registro{horariosData.length !== 1 ? 's' : ''}
+                    </Badge>
                   </div>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Entrada</TableHead>
+                        <TableHead>Saída</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead className="hidden md:table-cell">Descrição</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {horariosData.map((horario) => (
+                        <TableRow key={horario.id}>
+                          <TableCell className="font-medium">{horario.start_time}</TableCell>
+                          <TableCell className="font-medium">{horario.end_time}</TableCell>
+                          <TableCell className="font-bold">
+                            {calculateTotalHours(horario.start_time, horario.end_time)}
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate hidden md:table-cell">
+                            {horario.description || "—"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openModal(horario)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(horario.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))}
 
-                  <Button
-                    onClick={() => setCurrentPage(Math.min(totalPaginas, currentPage + 1))}
-                    disabled={currentPage === totalPaginas}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Próxima
-                  </Button>
-                </div>
-              )}
+            {/* Paginação */}
+            {totalPaginas > 1 && (
+              <div className="flex items-center justify-center space-x-2 py-4">
+                <Button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="sm"
+                >
+                  Anterior
+                </Button>
 
-              {/* Informações da paginação */}
-              {totalDias > 0 && (
-                <div className="text-center text-muted-foreground mt-4">
-                  Mostrando {startIndex + 1}-{Math.min(endIndex, totalDias)} de {totalDias} dias
+                <div className="flex space-x-1">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                    >
+                      {page}
+                    </Button>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
+
+                <Button
+                  onClick={() => setCurrentPage(Math.min(totalPaginas, currentPage + 1))}
+                  disabled={currentPage === totalPaginas}
+                  variant="outline"
+                  size="sm"
+                >
+                  Próxima
+                </Button>
+              </div>
+            )}
+
+            {/* Informações da paginação */}
+            {totalDias > 0 && (
+              <div className="text-center text-muted-foreground mt-4">
+                Mostrando {startIndex + 1}-{Math.min(endIndex, totalDias)} de {totalDias} dias
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Modal */}
@@ -615,4 +565,5 @@ export default function DashboardPage() {
       />
     </div>
   );
-} 
+}
+

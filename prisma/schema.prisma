@@ -57,6 +57,7 @@ model User {
   password      String?
   emailVerified DateTime?
   image         String?
+  dailyTargetMinutes Int      @default(480)
   accounts      Account[]
   sessions      Session[]
 }

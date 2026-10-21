@@ -38,7 +38,7 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 - Gerenciamento de registros de trabalho: criação, edição, exclusão, filtro por data e descrição, agrupamento diário e paginação.
 - Resumo geral das horas trabalhadas, dos dias registrados, da média diária e do banco de horas.
 - Gerenciamento de horas extras disponíveis e dos respectivos usos, com histórico e devolução ao saldo ao excluir um uso.
-- A jornada padrão usada no cálculo atual é fixa em oito horas por dia. A interface não oferece uma configuração para outra jornada. A necessidade de tornar esse valor configurável permanece em aberto.
+- A jornada diária agora é configurável por conta, com padrão de oito horas. A meta é aplicada à lista de horários e aos cálculos de saldo de horas extras; alterar a meta recalcula o histórico.
 - Horários, registros e saldos são armazenados por usuário. A interface e o fluxo esperado são próprios para uso individual; gestão de equipes não está documentada.
 - O código utiliza Next.js, TypeScript, Prisma e PostgreSQL. O README identifica Supabase como opção recomendada para o banco e Vercel para implantação.
 

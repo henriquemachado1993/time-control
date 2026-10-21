@@ -8,8 +8,8 @@ import { Calendar as CalendarIcon, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { TimePicker } from "@/components/ui/time-picker"
 import {
   Popover,
   PopoverContent,
@@ -85,7 +85,6 @@ interface DateTimePickerProps {
   dateLabel?: string
   timeLabel?: string
   datePlaceholder?: string
-  timePlaceholder?: string
   className?: string
   disabled?: boolean
 }
@@ -98,13 +97,11 @@ export function DateTimePicker({
   dateLabel = "Data",
   timeLabel = "Hora",
   datePlaceholder = "Selecionar data",
-  timePlaceholder = "00:00",
   className,
   disabled = false,
 }: DateTimePickerProps) {
   const [dateOpen, setDateOpen] = React.useState(false)
   const dateId = React.useId()
-  const timeId = React.useId()
 
   return (
     <div className={cn("grid grid-cols-2 gap-4", className)}>
@@ -141,18 +138,14 @@ export function DateTimePicker({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex min-w-0 flex-col gap-2">
-        <Label htmlFor={timeId} className="text-sm font-medium">{timeLabel}</Label>
-        <Input
-          id={timeId}
-          type="time"
-          value={time}
-          onChange={(e) => onTimeChange?.(e.target.value)}
-          placeholder={timePlaceholder}
-          disabled={disabled}
-          className="w-full"
-        />
-      </div>
+      <TimePicker
+        label={timeLabel}
+        value={time ?? ""}
+        onTimeChange={(selectedTime) => onTimeChange?.(selectedTime)}
+        disabled={disabled}
+        required
+        className="w-full"
+      />
     </div>
   )
 }

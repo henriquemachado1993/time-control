@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     const extraHoursByDate: { [key: string]: number } = {};
 
     for (const [date, totalWorkedHours] of Object.entries(workedHoursByDate)) {
-      const standardHours = 8;
+      const standardHours = user.dailyTargetMinutes / 60;
       const extraHours = Math.max(0, totalWorkedHours - standardHours);
 
       if (extraHours > 0) {

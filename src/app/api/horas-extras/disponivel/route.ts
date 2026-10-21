@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET - Calcular horas extras disponíveis automaticamente
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -45,8 +45,7 @@ export async function GET(request: NextRequest) {
     const extraHoursByDate: { [key: string]: number } = {};
 
     for (const [date, totalWorkedHours] of Object.entries(workedHoursByDate)) {
-      // Considerando 8 horas como jornada padrão
-      const standardHours = 8;
+      const standardHours = user.dailyTargetMinutes / 60;
       const extraHours = Math.max(0, totalWorkedHours - standardHours);
 
       if (extraHours > 0) {

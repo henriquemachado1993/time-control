@@ -16,8 +16,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { DateTimePicker, DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
+import { Progress } from "@/components/ui/progress";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Calendar, Plus, Search, Edit, Trash2, Clock, Loader2 } from "lucide-react";
+import { Calendar, Plus, Search, Edit, Trash2, Clock, Loader2, Settings2 } from "lucide-react";
+import { formatDailyTarget, formatHours, parseDailyTarget, workedMinutes } from "@/lib/hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type User = any;
@@ -53,19 +56,13 @@ function groupByDate(workHours: WorkHour[]) {
   return groups;
 }
 
-function calculateTotalDay(workHours: WorkHour[]) {
-  const totalMinutes = workHours.reduce((total, h) => {
-    const hours = calculateTotalHours(h.start_time, h.end_time);
-    if (hours === "-") return total;
-    const [h_str, m_str] = hours.split("h ");
-    const h_num = parseInt(h_str) || 0;
-    const m_num = parseInt(m_str.replace("min", "")) || 0;
-    return total + h_num * 60 + m_num;
-  }, 0);
+const DEFAULT_DAILY_TARGET_MINUTES = 8 * 60;
 
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${h}h ${m}min`;
+function formatTargetInput(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
 }
 
 export default function HorariosPage() {
@@ -89,6 +86,12 @@ export default function HorariosPage() {
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [dailyTargetMinutes, setDailyTargetMinutes] = useState(DEFAULT_DAILY_TARGET_MINUTES);
+  const [targetInput, setTargetInput] = useState("08:00");
+  const [targetDialogOpen, setTargetDialogOpen] = useState(false);
+  const [targetLoading, setTargetLoading] = useState(true);
+  const [targetSaving, setTargetSaving] = useState(false);
+  const [targetError, setTargetError] = useState("");
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [searchDescription, setSearchDescription] = useState("");
 
@@ -99,6 +102,59 @@ export default function HorariosPage() {
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
   const DIAS_POR_PAGINA = 5;
+
+  const fetchDailyTarget = async () => {
+    setTargetLoading(true);
+    setTargetError("");
+
+    try {
+      const response = await fetch("/api/configuracoes/jornada");
+      const result = await response.json();
+
+      if (!response.ok || !Number.isInteger(result.dailyTargetMinutes)) {
+        throw new Error(result.error || "Não foi possível carregar a jornada diária.");
+      }
+
+      setDailyTargetMinutes(result.dailyTargetMinutes);
+      setTargetInput(formatTargetInput(result.dailyTargetMinutes));
+    } catch (error) {
+      setTargetError(error instanceof Error ? error.message : "Não foi possível carregar a jornada diária.");
+    } finally {
+      setTargetLoading(false);
+    }
+  };
+
+  const handleSaveDailyTarget = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const parsedTarget = parseDailyTarget(targetInput);
+    if (parsedTarget === null) {
+      setTargetError("Informe um horário entre 00:01 e 24:00, no formato HH:mm.");
+      return;
+    }
+
+    setTargetSaving(true);
+    setTargetError("");
+
+    try {
+      const response = await fetch("/api/configuracoes/jornada", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dailyTargetMinutes: parsedTarget }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.error || "Não foi possível salvar a jornada diária.");
+
+      setDailyTargetMinutes(result.dailyTargetMinutes);
+      setTargetInput(formatTargetInput(result.dailyTargetMinutes));
+      setTargetDialogOpen(false);
+    } catch (error) {
+      setTargetError(error instanceof Error ? error.message : "Não foi possível salvar a jornada diária.");
+    } finally {
+      setTargetSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (status === "loading") return;
@@ -137,7 +193,10 @@ export default function HorariosPage() {
   };
 
   useEffect(() => {
-    if (user) fetchHorarios();
+    if (user) {
+      fetchHorarios();
+      fetchDailyTarget();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -287,6 +346,7 @@ export default function HorariosPage() {
         </Alert>
       )}
       {listError && <Alert variant="destructive" className="mb-6"><AlertDescription>{listError}</AlertDescription></Alert>}
+      {targetError && !targetDialogOpen && <Alert variant="destructive" className="mb-6"><AlertDescription>{targetError}<Button variant="outline" size="sm" className="ml-3" onClick={fetchDailyTarget} disabled={targetLoading}>Tentar novamente</Button></AlertDescription></Alert>}
       {formError && !showModal && <Alert variant="destructive" className="mb-6"><AlertDescription>{formError}</AlertDescription></Alert>}
 
       {/* Controles de busca */}
@@ -298,10 +358,16 @@ export default function HorariosPage() {
               Gerencie e visualize seus registros de trabalho
             </p>
           </div>
-          <Button className="self-start" onClick={() => openModal()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Registro
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="self-start" onClick={() => { setTargetInput(formatTargetInput(dailyTargetMinutes)); setTargetError(""); setTargetDialogOpen(true); }} disabled={targetLoading}>
+              <Settings2 aria-hidden="true" />
+              Jornada · {formatDailyTarget(dailyTargetMinutes)}
+            </Button>
+            <Button className="self-start" onClick={() => openModal()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Registro
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -393,9 +459,31 @@ export default function HorariosPage() {
                         {dayjs(data).format("DD/MM/YYYY")} · {dayjs(data).locale("pt-br").format("dddd")}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1 mt-2">
-                        <Clock className="w-4 h-4" />
-                        Total do dia: <span className="font-semibold">{calculateTotalDay(horariosData)}</span>
+                        <Clock className="size-4" aria-hidden="true" />
+                        Total do dia: <span className="font-semibold tabular-nums">{formatHours(horariosData.reduce((total, registro) => total + workedMinutes(registro.start_time, registro.end_time), 0) / 60)}</span>
                       </CardDescription>
+                      {(() => {
+                        const totalMinutes = horariosData.reduce((total, registro) => total + workedMinutes(registro.start_time, registro.end_time), 0);
+                        const minutesMissing = Math.max(dailyTargetMinutes - totalMinutes, 0);
+                        const minutesOver = Math.max(totalMinutes - dailyTargetMinutes, 0);
+
+                        return (
+                          <div className="mt-2 space-y-2">
+                            <p className="text-sm text-muted-foreground">
+                              {minutesMissing > 0
+                                ? `Faltam ${formatHours(minutesMissing / 60)} para completar a jornada de ${formatDailyTarget(dailyTargetMinutes)}.`
+                                : minutesOver > 0
+                                  ? `Jornada completa · ${formatHours(minutesOver / 60)} extras.`
+                                  : "Jornada diária completa."}
+                            </p>
+                            <Progress
+                              value={Math.min((totalMinutes / dailyTargetMinutes) * 100, 100)}
+                              aria-label={`Jornada diária: ${formatHours(totalMinutes / 60)} de ${formatDailyTarget(dailyTargetMinutes)}`}
+                              className="h-1.5 max-w-64"
+                            />
+                          </div>
+                        );
+                      })()}
                     </div>
                     <Badge variant="secondary">
                       {horariosData.length} registro{horariosData.length !== 1 ? 's' : ''}
@@ -502,6 +590,47 @@ export default function HorariosPage() {
       </div>
 
       {/* Modal */}
+      <Dialog open={targetDialogOpen} onOpenChange={setTargetDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Clock className="size-5" aria-hidden="true" />Configurar jornada diária</DialogTitle>
+            <DialogDescription>Defina quantas horas você quer cumprir por dia. O padrão é 08:00.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveDailyTarget} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="daily-target">Horas e minutos</Label>
+              <Input
+                id="daily-target"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="08:00"
+                pattern="(?:[01]?\d|2[0-3]):[0-5]\d|24:00"
+                maxLength={5}
+                value={targetInput}
+                onChange={(event) => setTargetInput(event.target.value)}
+                required
+              />
+              <p className="text-sm text-muted-foreground">Use o formato HH:mm, por exemplo 08:00 ou 07:30.</p>
+              <p className="text-sm text-muted-foreground">Alterar a jornada também recalcula o saldo de horas extras do seu histórico.</p>
+            </div>
+            {targetError && <Alert variant="destructive"><AlertDescription>{targetError}</AlertDescription></Alert>}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+              <Button type="button" variant="ghost" onClick={() => { setTargetInput("08:00"); setTargetError(""); }} disabled={targetSaving || targetInput === "08:00"}>
+                Restaurar padrão · 8h
+              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setTargetDialogOpen(false)} disabled={targetSaving}>Cancelar</Button>
+                <Button type="submit" disabled={targetSaving || targetLoading}>
+                  {targetSaving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                  {targetSaving ? "Salvando…" : "Salvar jornada"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -534,18 +663,8 @@ export default function HorariosPage() {
               dateLabel="Data"
               timeLabel="Entrada"
               datePlaceholder="Selecionar data"
-              timePlaceholder="00:00"
             />
-            <div className="space-y-2">
-              <Label htmlFor="end">Saída</Label>
-              <Input
-                id="end"
-                type="time"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                required
-              />
-            </div>
+            <TimePicker id="end" label="Saída" value={end} onTimeChange={setEnd} required />
             <div className="space-y-2">
               <Label htmlFor="description">Descrição (opcional)</Label>
               <Textarea

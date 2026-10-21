@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Clock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -94,7 +95,7 @@ export default function LoginPage() {
         {/* Header com toggle de tema */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Clock className="h-6 w-6" />
+            <Image src="/brand/logo.svg" width={36} height={36} alt="" className="shrink-0" />
             <h1 className="text-lg font-semibold">Controle de Horas</h1>
           </div>
           <ThemeToggle />

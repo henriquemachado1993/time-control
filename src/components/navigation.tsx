@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Clock, LogOut, LayoutDashboard, CalendarDays, Timer } from "lucide-react";
+import { LogOut, LayoutDashboard, CalendarDays, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
@@ -27,7 +28,7 @@ export function Navigation() {
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Pular para o conteúdo</a>
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 px-4 sm:gap-x-6 sm:px-6 lg:flex-nowrap lg:px-8">
         <Link href="/dashboard" className="flex h-16 shrink-0 items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-18 sm:gap-3" aria-label="Controle de Horas — Dashboard">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><Clock className="size-5" aria-hidden="true" /></span>
+          <Image src="/brand/logo.svg" width={36} height={36} alt="" className="shrink-0" />
           <span className="text-sm font-semibold tracking-tight sm:text-base">Controle de Horas</span>
         </Link>
         <nav aria-label="Navegação principal" className="order-3 -mb-px flex w-full items-stretch sm:gap-2 lg:order-none lg:ml-4 lg:h-18 lg:w-auto lg:flex-1 lg:gap-5">

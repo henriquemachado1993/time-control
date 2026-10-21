@@ -1,0 +1,1746 @@
+{
+  "method": "Chromium headless; application production build; intercepted API fixtures; no database writes",
+  "pages": [
+    {
+      "surface": "login",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 2,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "Entrar",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "Não tem conta? Criar conta",
+          "width": 206,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [
+        {
+          "id": "email",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "password",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": "login-1440-light.png"
+    },
+    {
+      "surface": "login",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 2,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "Entrar",
+          "width": 398,
+          "height": 40
+        },
+        {
+          "name": "Não tem conta? Criar conta",
+          "width": 206,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [
+        {
+          "id": "email",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "password",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "login",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 2,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Entrar",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Não tem conta? Criar conta",
+          "width": 206,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [
+        {
+          "id": "email",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "password",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "login",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 2,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Entrar",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Não tem conta? Criar conta",
+          "width": 206,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [
+        {
+          "id": "email",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "password",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": "login-390-dark.png"
+    },
+    {
+      "surface": "dashboard",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 12,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 139,
+          "height": 40
+        },
+        {
+          "name": "Ver todos",
+          "width": 103,
+          "height": 36
+        },
+        {
+          "name": "Gerenciar horas extras",
+          "width": 290,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": "dashboard-1440-light.png"
+    },
+    {
+      "surface": "dashboard",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 12,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 139,
+          "height": 40
+        },
+        {
+          "name": "Ver todos",
+          "width": 103,
+          "height": 36
+        },
+        {
+          "name": "Gerenciar horas extras",
+          "width": 290,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "dashboard",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 12,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 139,
+          "height": 40
+        },
+        {
+          "name": "Ver todos",
+          "width": 103,
+          "height": 36
+        },
+        {
+          "name": "Gerenciar horas extras",
+          "width": 308,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "dashboard",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 12,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 139,
+          "height": 40
+        },
+        {
+          "name": "Ver todos",
+          "width": 103,
+          "height": 36
+        },
+        {
+          "name": "Gerenciar horas extras",
+          "width": 308,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": "dashboard-390-dark.png"
+    },
+    {
+      "surface": "horarios",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Jornada · 8h",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "Selecionar data",
+          "width": 575,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 575,
+          "height": 40
+        },
+        {
+          "name": "Buscar",
+          "width": 98,
+          "height": 40
+        },
+        {
+          "name": "Limpar",
+          "width": 78,
+          "height": 40
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [
+        {
+          "label": "Jornada diária: 8h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 12h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 7h 30min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "search-description",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": "horarios-1440-light.png"
+    },
+    {
+      "surface": "horarios",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Jornada · 8h",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "Selecionar data",
+          "width": 575,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 575,
+          "height": 40
+        },
+        {
+          "name": "Buscar",
+          "width": 98,
+          "height": 40
+        },
+        {
+          "name": "Limpar",
+          "width": 78,
+          "height": 40
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [
+        {
+          "label": "Jornada diária: 8h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 12h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 7h 30min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "search-description",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "horarios",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Jornada · 8h",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "Selecionar data",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Buscar",
+          "width": 98,
+          "height": 40
+        },
+        {
+          "name": "Limpar",
+          "width": 78,
+          "height": 40
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [
+        {
+          "label": "Jornada diária: 8h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 12h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 7h 30min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "search-description",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "horarios",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Jornada · 8h",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "Selecionar data",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Buscar",
+          "width": 98,
+          "height": 40
+        },
+        {
+          "name": "Limpar",
+          "width": 78,
+          "height": 40
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 21:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:30 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 13:00 a 17:00",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [
+        {
+          "label": "Jornada diária: 8h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 12h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        },
+        {
+          "label": "Jornada diária: 7h 30min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "search-description",
+          "background": "oklab(0.249999 -0.00000248104 0.00000584126 / 0.3)",
+          "border": "lab(13 0 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "errors": [],
+      "screenshot": "horarios-390-dark.png"
+    },
+    {
+      "surface": "horas-extras",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Registrar Uso",
+          "width": 141,
+          "height": 40
+        },
+        {
+          "name": "Editar uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": null
+    },
+    {
+      "surface": "horas-extras",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 1440,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Registrar Uso",
+          "width": 141,
+          "height": 40
+        },
+        {
+          "name": "Editar uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": "horas-extras-1440-dark.png"
+    },
+    {
+      "surface": "horas-extras",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Registrar Uso",
+          "width": 141,
+          "height": 40
+        },
+        {
+          "name": "Editar uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": "horas-extras-390-light.png"
+    },
+    {
+      "surface": "horas-extras",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 30,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Registrar Uso",
+          "width": 141,
+          "height": 40
+        },
+        {
+          "name": "Editar uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 20/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 19/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 18/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 17/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 16/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 15/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 14/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 13/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 12/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Editar uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir uso de 0h 15min em 11/10/2026",
+          "width": 36,
+          "height": 36
+        }
+      ],
+      "progress": [],
+      "inputs": [],
+      "errors": [],
+      "screenshot": null
+    }
+  ],
+  "scenarios": {
+    "filteredDay": {
+      "before": "Jornada diária: 8h 00min de 8h",
+      "after": "Jornada diária: 4h 00min de 8h",
+      "text": "Registros de Horas\n\nGerencie e visualize seus registros de trabalho\n\nJornada · 8h\nNovo Registro\nFiltros\nFiltre seus registros por data ou descrição\nBuscar por data\nSelecionar data\nBuscar por descrição\nBuscar\nLimpar\n21/10/2026 · quarta-feira\nTotal do dia:\n4h 00min\n\nFaltam 4h 00min para completar a jornada de 8h.\n\n1 registro\nEntrada\tSaída\tTotal\tAções\n08:00\t12:00\t4h 0min\t\nMostrando 1-1 de 1 dias"
+    },
+    "dialog": {
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 19,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Jornada · 8h",
+          "width": 127,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "Selecionar data",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 308,
+          "height": 40
+        },
+        {
+          "name": "Buscar",
+          "width": 98,
+          "height": 40
+        },
+        {
+          "name": "Limpar",
+          "width": 78,
+          "height": 40
+        },
+        {
+          "name": "Editar registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "Excluir registro de 08:00 a 12:00",
+          "width": 36,
+          "height": 36
+        },
+        {
+          "name": "21/10/2026",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 147,
+          "height": 40
+        },
+        {
+          "name": "",
+          "width": 310,
+          "height": 40
+        },
+        {
+          "name": "Salvar",
+          "width": 150,
+          "height": 40
+        },
+        {
+          "name": "Cancelar",
+          "width": 152,
+          "height": 40
+        },
+        {
+          "name": "Fechar",
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "progress": [
+        {
+          "label": "Jornada diária: 4h 00min de 8h",
+          "value": null,
+          "state": "indeterminate"
+        }
+      ],
+      "inputs": [
+        {
+          "id": "search-description",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "_r_h_",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 -0.0000596046 0)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "end",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(66.128 -0.0000298023 0.0000119209)",
+          "surrounding": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    },
+    "reversedTime": {
+      "outgoingMockedPayload": {
+        "date": "2026-10-21",
+        "start_time": "18:00",
+        "end_time": "09:00",
+        "description": null
+      }
+    },
+    "history": {
+      "receivedRecords": 12,
+      "displayedEditButtons": 10,
+      "text": "Horas Extras\n\nControle e gerenciamento das suas horas extras\n\nHoras Disponíveis\n1h 00min\n\nSaldo atual de horas extras\n\nHoras Geradas\n4h 00min\n\nTotal acumulado de extras\n\nHoras Utilizadas\n3h 00min\n\nTotal já utilizado\n\nRegistro de Uso de Horas Extras\nRegistre quando utilizar suas horas extras acumuladas automaticamente\nRegistrar Uso\n\n0h 15min utilizadas em 20/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 19/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 18/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 17/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 16/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 15/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 14/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 13/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 12/10/2026\n\nCompensação de jornada\n\n0h 15min utilizadas em 11/10/2026\n\nCompensação de jornada\n\nMostrando 10 registros mais recentes de 12 total"
+    },
+    "commaDuration": "Convertido: 1h 00min",
+    "invalidMinutes": "Convertido: 2h 30min",
+    "editSpent": "Horas insuficientes. Você tem 0h 00min disponíveis.",
+    "emptyState": {
+      "pageOverflow": false,
+      "width": 390,
+      "tablerIcons": 11,
+      "lucideIcons": 0,
+      "smallControls": [
+        {
+          "name": "Pular para o conteúdo",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "name": "Alterar tema",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Abrir menu da conta",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "name": "Novo Registro",
+          "width": 139,
+          "height": 40
+        },
+        {
+          "name": "Ver todos",
+          "width": 103,
+          "height": 36
+        },
+        {
+          "name": "Criar primeiro registro",
+          "width": 191,
+          "height": 40
+        },
+        {
+          "name": "Gerenciar horas extras",
+          "width": 308,
+          "height": 40
+        }
+      ],
+      "progress": [],
+      "inputs": []
+    },
+    "errorState": "Não foi possível carregar o resumo. Tente novamente.\nTentar novamente"
+  }
+}

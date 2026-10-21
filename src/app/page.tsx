@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock } from "lucide-react";
+import { IconClock } from "@tabler/icons-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function HomePage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center">
-          <Clock className="h-12 w-12 animate-pulse" />
+          <IconClock className="h-12 w-12 animate-pulse" />
         </div>
         <div className="space-y-2">
           <Skeleton className="h-4 w-32 mx-auto" />

@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -151,7 +151,7 @@ export default function LoginPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                     Carregando...
                   </>
                 ) : (

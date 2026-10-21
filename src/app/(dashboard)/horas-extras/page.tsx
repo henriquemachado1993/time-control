@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Banknote, Timer, TrendingUp, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { IconCashBanknote, IconStopwatch, IconTrendingUp, IconPlus, IconEdit, IconTrash, IconLoader2 } from "@tabler/icons-react";
 import { formatHours } from "@/lib/hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -289,7 +289,7 @@ export default function HorasExtrasPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Horas Disponíveis</CardTitle>
-              <Banknote className="h-4 w-4 text-muted-foreground" />
+              <IconCashBanknote className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.available) : "—"}</div>
@@ -302,7 +302,7 @@ export default function HorasExtrasPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Horas Geradas</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_generated) : "—"}</div>
@@ -315,7 +315,7 @@ export default function HorasExtrasPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Horas Utilizadas</CardTitle>
-              <Timer className="h-4 w-4 text-muted-foreground" />
+              <IconStopwatch className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_used) : "—"}</div>
@@ -332,7 +332,7 @@ export default function HorasExtrasPage() {
             <div className="flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center">
               <div>
                 <CardTitle className="flex items-center gap-2 leading-snug">
-                  <Timer className="w-5 h-5" />
+                  <IconStopwatch className="w-5 h-5" />
                   Registro de Uso de Horas Extras
                 </CardTitle>
                 <CardDescription>
@@ -344,7 +344,7 @@ export default function HorasExtrasPage() {
                 className="self-start"
                 disabled={dataLoading || !!dataError || !horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <IconPlus className="w-4 h-4 mr-2" />
                 Registrar Uso
               </Button>
             </div>
@@ -352,7 +352,7 @@ export default function HorasExtrasPage() {
           <CardContent>
             {dataLoading ? <div className="space-y-3" aria-label="Carregando histórico"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : dataError ? null : usosHorasExtras.length === 0 ? (
               <div className="text-center py-8">
-                <Timer className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <IconStopwatch className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">
                   {!horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0
                     ? "Você ainda não possui horas extras disponíveis"
@@ -361,7 +361,7 @@ export default function HorasExtrasPage() {
                 </p>
                 {horasExtrasDisponiveis && horasExtrasDisponiveis.available > 0 && (
                   <Button onClick={() => openUsoModal()} className="mt-4">
-                    <Plus className="w-4 h-4 mr-2" />
+                    <IconPlus className="w-4 h-4 mr-2" />
                     Registrar Primeiro Uso
                   </Button>
                 )}
@@ -388,7 +388,7 @@ export default function HorasExtrasPage() {
                         onClick={() => openUsoModal(uso)}
                         aria-label={`Editar uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
                       >
-                        <Edit className="w-4 h-4" />
+                        <IconEdit className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -397,7 +397,7 @@ export default function HorasExtrasPage() {
                         aria-label={`Excluir uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <IconTrash className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -420,12 +420,12 @@ export default function HorasExtrasPage() {
             <DialogTitle className="flex items-center gap-2">
               {editingUso ? (
                 <>
-                  <Edit className="w-5 h-5" />
+                  <IconEdit className="w-5 h-5" />
                   Editar Uso
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5" />
+                  <IconPlus className="w-5 h-5" />
                   Registrar Uso de Horas Extras
                 </>
               )}
@@ -494,7 +494,7 @@ export default function HorasExtrasPage() {
             )}
             <div className="flex gap-2 pt-4">
               <Button type="submit" className="flex-1" disabled={saving || !!success}>
-                {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {saving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {saving ? "Salvando..." : editingUso ? "Atualizar" : "Registrar"}
               </Button>
               <Button type="button" variant="outline" onClick={closeUsoModal} className="flex-1">

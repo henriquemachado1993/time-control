@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, Trash2 } from "lucide-react"
+import { IconAlertTriangle, IconTrash } from "@tabler/icons-react"
 
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
@@ -66,9 +66,9 @@ export function ConfirmationDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {variant === "destructive" ? (
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <IconAlertTriangle className="h-5 w-5 text-destructive" />
               ) : (
-                <Trash2 className="h-5 w-5" />
+                <IconTrash className="h-5 w-5" />
               )}
               {title}
             </DialogTitle>
@@ -102,9 +102,9 @@ export function ConfirmationDialog({
         <DrawerHeader className="text-left">
           <DrawerTitle className="flex items-center gap-2">
             {variant === "destructive" ? (
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <IconAlertTriangle className="h-5 w-5 text-destructive" />
             ) : (
-              <Trash2 className="h-5 w-5" />
+              <IconTrash className="h-5 w-5" />
             )}
             {title}
           </DrawerTitle>

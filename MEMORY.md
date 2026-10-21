@@ -20,7 +20,7 @@ Extra hours are computed from the day's summed work intervals, applying the acco
 
 ## Interface and validation
 
-The web app uses Next.js App Router, TypeScript, Tailwind CSS 4, shared Radix-based UI components under `src/components/ui`, and Lucide icons. Theme selection is handled by `next-themes`.
+The web app uses Next.js App Router, TypeScript, Tailwind CSS 4, shared Radix-based UI components under `src/components/ui`, and Tabler Icons (`@tabler/icons-react`). Import named `Icon*` components directly, preserve the default 2px stroke and `currentColor`, and size them through the shared component classes. Theme selection is handled by `next-themes`.
 
 Forms should reuse the shared `Input`, `Textarea`, `DatePicker`, `DateTimePicker`, and `TimePicker` components so labels, field sizes, and focus states stay consistent. The work-hours listing shows daily progress toward the account's configured target.
 

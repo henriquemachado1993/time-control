@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowRight, CalendarDays, Clock, Plus, RotateCcw, Timer } from "lucide-react";
+import { IconArrowRight, IconCalendarWeek, IconClock, IconPlus, IconRefresh, IconStopwatch } from "@tabler/icons-react";
 import { formatHours, workedHours } from "@/lib/hours";
 
 type WorkHour = { id: string; date: string; start_time: string; end_time: string; description?: string };
@@ -61,13 +61,13 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground sm:text-base">Visão geral do seu controle de horas e produtividade</p>
         </div>
-        <Button asChild className="h-10 self-start"><Link href="/horarios?novo=1"><Plus aria-hidden="true" />Novo Registro</Link></Button>
+        <Button asChild className="h-10 self-start"><Link href="/horarios?novo=1"><IconPlus aria-hidden="true" />Novo Registro</Link></Button>
       </div>
 
       {error ? (
         <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
           <AlertDescription>Não foi possível carregar o resumo. Tente novamente.</AlertDescription>
-          <Button variant="outline" onClick={loadDashboard}><RotateCcw aria-hidden="true" />Tentar novamente</Button>
+          <Button variant="outline" onClick={loadDashboard}><IconRefresh aria-hidden="true" />Tentar novamente</Button>
         </Alert>
       ) : (
         <>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             <Card className="min-w-0 gap-0 overflow-hidden">
               <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-5">
                 <div className="space-y-1.5"><h2 className="font-semibold">Registros recentes</h2><p className="text-sm text-muted-foreground">Seus últimos dias de trabalho</p></div>
-                <Button asChild variant="ghost" size="sm"><Link href="/horarios">Ver todos<ArrowRight aria-hidden="true" /></Link></Button>
+                <Button asChild variant="ghost" size="sm"><Link href="/horarios">Ver todos<IconArrowRight aria-hidden="true" /></Link></Button>
               </CardHeader>
               <CardContent className="px-0">
                 {loading ? <div className="space-y-4 px-6" aria-label="Carregando registros">{Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
@@ -95,25 +95,25 @@ export default function DashboardPage() {
                         const dayRecords = records.filter(record => record.date.slice(0, 10) === date);
                         return <div key={date} className="flex items-center justify-between gap-3 px-6 py-4">
                           <div className="flex min-w-0 items-center gap-3">
-                            <CalendarDays className="hidden size-4 shrink-0 text-muted-foreground sm:block" aria-hidden="true" />
+                            <IconCalendarWeek className="hidden size-4 shrink-0 text-muted-foreground sm:block" aria-hidden="true" />
                             <div className="min-w-0"><p className="text-sm font-medium capitalize">{dateLabel(date)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{dayRecords.length} {dayRecords.length === 1 ? "registro" : "registros"} · {dayRecords.map(record => `${record.start_time.slice(0, 5)}–${record.end_time.slice(0, 5)}`).join(" / ")}</p></div>
                           </div>
                           <span className="shrink-0 text-sm font-semibold tabular-nums">{formatHours(dayRecords.reduce((total, record) => total + workedHours(record.start_time, record.end_time), 0))}</span>
                         </div>;
                       })}
                     </div>
-                  ) : <div className="flex flex-col items-center px-6 py-12 text-center"><Clock className="mb-4 size-8 text-muted-foreground" aria-hidden="true" /><h3 className="font-medium">Seu histórico começa aqui</h3><p className="mt-2 max-w-xs text-sm text-muted-foreground">Adicione sua entrada e saída para acompanhar as horas trabalhadas.</p><Button asChild variant="outline" className="mt-5"><Link href="/horarios?novo=1"><Plus aria-hidden="true" />Criar primeiro registro</Link></Button></div>}
+                  ) : <div className="flex flex-col items-center px-6 py-12 text-center"><IconClock className="mb-4 size-8 text-muted-foreground" aria-hidden="true" /><h3 className="font-medium">Seu histórico começa aqui</h3><p className="mt-2 max-w-xs text-sm text-muted-foreground">Adicione sua entrada e saída para acompanhar as horas trabalhadas.</p><Button asChild variant="outline" className="mt-5"><Link href="/horarios?novo=1"><IconPlus aria-hidden="true" />Criar primeiro registro</Link></Button></div>}
               </CardContent>
             </Card>
 
             <aside className="space-y-5" aria-label="Banco de horas extras">
               <Card>
-                <CardHeader className="gap-2"><h2 className="flex items-center gap-2 font-semibold"><Timer className="size-4 text-muted-foreground" aria-hidden="true" />Banco de horas</h2><p className="text-sm text-muted-foreground">Resumo de Horas Extras</p></CardHeader>
+                <CardHeader className="gap-2"><h2 className="flex items-center gap-2 font-semibold"><IconStopwatch className="size-4 text-muted-foreground" aria-hidden="true" />Banco de horas</h2><p className="text-sm text-muted-foreground">Resumo de Horas Extras</p></CardHeader>
                 <CardContent className="space-y-5">
                   <dl className="space-y-4 text-sm">
                     {[{ label: "Geradas", value: data?.bank.total_generated }, { label: "Utilizadas", value: data?.bank.total_used }, { label: "Disponíveis", value: data?.bank.available }].map((item, i) => <div key={item.label} className={`flex items-center justify-between gap-3 ${i === 2 ? "border-t pt-4 font-semibold" : "text-muted-foreground"}`}><dt>{item.label}</dt><dd className="tabular-nums">{loading ? <Skeleton className="h-5 w-20" /> : formatHours(item.value ?? 0)}</dd></div>)}
                   </dl>
-                  <Button asChild variant="outline" className="h-10 w-full"><Link href="/horas-extras">Gerenciar horas extras<ArrowRight aria-hidden="true" /></Link></Button>
+                  <Button asChild variant="outline" className="h-10 w-full"><Link href="/horas-extras">Gerenciar horas extras<IconArrowRight aria-hidden="true" /></Link></Button>
                 </CardContent>
               </Card>
               <p className="px-1 text-xs leading-relaxed text-muted-foreground">Os totais consideram todos os seus registros. Consulte os filtros em Registros de Horas para encontrar um dia específico.</p>

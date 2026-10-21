@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, LayoutDashboard, CalendarDays, Timer } from "lucide-react";
+import { IconLogout, IconLayoutDashboard, IconCalendarWeek, IconStopwatch } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
-  { title: "Dashboard", mobileTitle: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Registros de Horas", mobileTitle: "Registros", href: "/horarios", icon: CalendarDays },
-  { title: "Horas Extras", mobileTitle: "Horas Extras", href: "/horas-extras", icon: Timer },
+  { title: "Dashboard", mobileTitle: "Dashboard", href: "/dashboard", icon: IconLayoutDashboard },
+  { title: "Registros de Horas", mobileTitle: "Registros", href: "/horarios", icon: IconCalendarWeek },
+  { title: "Horas Extras", mobileTitle: "Horas Extras", href: "/horas-extras", icon: IconStopwatch },
 ];
 
 export function Navigation() {
@@ -56,7 +56,7 @@ export function Navigation() {
                 <DropdownMenuLabel className="break-all">{displayName}</DropdownMenuLabel>
                 {session.user?.name && <p className="px-2 pb-2 text-xs text-muted-foreground break-all">{session.user.email}</p>}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}><LogOut className="size-4" />Sair da conta</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}><IconLogout className="size-4" />Sair da conta</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>}

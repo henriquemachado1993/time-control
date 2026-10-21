@@ -19,7 +19,7 @@ import { DateTimePicker, DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Progress } from "@/components/ui/progress";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Calendar, Plus, Search, Edit, Trash2, Clock, Loader2, Settings2 } from "lucide-react";
+import { IconCalendar, IconPlus, IconSearch, IconEdit, IconTrash, IconClock, IconLoader2, IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { formatDailyTarget, formatHours, parseDailyTarget, workedMinutes } from "@/lib/hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -360,11 +360,11 @@ export default function HorariosPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" className="self-start" onClick={() => { setTargetInput(formatTargetInput(dailyTargetMinutes)); setTargetError(""); setTargetDialogOpen(true); }} disabled={targetLoading}>
-              <Settings2 aria-hidden="true" />
+              <IconAdjustmentsHorizontal aria-hidden="true" />
               Jornada · {formatDailyTarget(dailyTargetMinutes)}
             </Button>
             <Button className="self-start" onClick={() => openModal()}>
-              <Plus className="w-4 h-4 mr-2" />
+              <IconPlus className="w-4 h-4 mr-2" />
               Novo Registro
             </Button>
           </div>
@@ -373,7 +373,7 @@ export default function HorariosPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
+              <IconSearch className="w-5 h-5" />
               Filtros
             </CardTitle>
             <CardDescription>
@@ -392,7 +392,7 @@ export default function HorariosPage() {
                 />
                 <div className="space-y-2">
                   <Label htmlFor="search-description" className="flex items-center gap-2">
-                    <Search className="w-4 h-4" />
+                    <IconSearch className="w-4 h-4" />
                     Buscar por descrição
                   </Label>
                   <Input
@@ -406,7 +406,7 @@ export default function HorariosPage() {
               </div>
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button type="submit" disabled={listLoading}>
-                  <Search className="w-4 h-4 mr-2" />
+                  <IconSearch className="w-4 h-4 mr-2" />
                   Buscar
                 </Button>
                 <Button type="button" variant="outline" onClick={clearSearch} disabled={listLoading}>
@@ -441,7 +441,7 @@ export default function HorariosPage() {
         ) : listError ? null : diasPaginados.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <Clock className="size-8 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
+              <IconClock className="size-8 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
               <h2 className="font-medium">Nenhum horário encontrado</h2>
               <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{searchDate || searchDescription ? "Experimente outra data ou descrição, ou limpe os filtros." : "Registre sua entrada e saída para começar a acompanhar sua jornada."}</p>
               <Button variant="outline" className="mt-5" onClick={searchDate || searchDescription ? clearSearch : () => openModal()}>{searchDate || searchDescription ? "Limpar filtros" : "Criar primeiro registro"}</Button>
@@ -455,11 +455,11 @@ export default function HorariosPage() {
                   <div className="flex flex-wrap justify-between items-center gap-3">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5" />
+                        <IconCalendar className="w-5 h-5" />
                         {dayjs(data).format("DD/MM/YYYY")} · {dayjs(data).locale("pt-br").format("dddd")}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1 mt-2">
-                        <Clock className="size-4" aria-hidden="true" />
+                        <IconClock className="size-4" aria-hidden="true" />
                         Total do dia: <span className="font-semibold tabular-nums">{formatHours(horariosData.reduce((total, registro) => total + workedMinutes(registro.start_time, registro.end_time), 0) / 60)}</span>
                       </CardDescription>
                       {(() => {
@@ -520,7 +520,7 @@ export default function HorariosPage() {
                                 onClick={() => openModal(horario)}
                                 aria-label={`Editar registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
                               >
-                                <Edit className="w-4 h-4" />
+                                <IconEdit className="w-4 h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -529,7 +529,7 @@ export default function HorariosPage() {
                                 aria-label={`Excluir registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
                                 className="text-destructive hover:text-destructive"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <IconTrash className="w-4 h-4" />
                               </Button>
                             </div>
                           </TableCell>
@@ -593,7 +593,7 @@ export default function HorariosPage() {
       <Dialog open={targetDialogOpen} onOpenChange={setTargetDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Clock className="size-5" aria-hidden="true" />Configurar jornada diária</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><IconClock className="size-5" aria-hidden="true" />Configurar jornada diária</DialogTitle>
             <DialogDescription>Defina quantas horas você quer cumprir por dia. O padrão é 08:00.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSaveDailyTarget} className="space-y-5">
@@ -622,7 +622,7 @@ export default function HorariosPage() {
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setTargetDialogOpen(false)} disabled={targetSaving}>Cancelar</Button>
                 <Button type="submit" disabled={targetSaving || targetLoading}>
-                  {targetSaving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                  {targetSaving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
                   {targetSaving ? "Salvando…" : "Salvar jornada"}
                 </Button>
               </div>
@@ -637,12 +637,12 @@ export default function HorariosPage() {
             <DialogTitle className="flex items-center gap-2">
               {editingHorario ? (
                 <>
-                  <Edit className="w-5 h-5" />
+                  <IconEdit className="w-5 h-5" />
                   Editar Horário
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5" />
+                  <IconPlus className="w-5 h-5" />
                   Novo Horário
                 </>
               )}
@@ -687,7 +687,7 @@ export default function HorariosPage() {
             )}
             <div className="flex gap-2 pt-4">
               <Button type="submit" className="flex-1" disabled={saving || !!success}>
-                {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {saving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {saving ? "Salvando..." : editingHorario ? "Atualizar" : "Salvar"}
               </Button>
               <Button type="button" variant="outline" onClick={closeModal} className="flex-1">

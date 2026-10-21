@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
+import "dayjs/locale/pt-br";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +15,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { DateTimePicker, DatePicker } from "@/components/ui/date-picker";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Calendar, Plus, Search, Edit, Trash2, Clock } from "lucide-react";
+import { Calendar, Plus, Search, Edit, Trash2, Clock, Loader2 } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type User = any;
@@ -86,7 +86,9 @@ export default function HorariosPage() {
   const [success, setSuccess] = useState("");
   const [formError, setFormError] = useState("");
   const [horarios, setHorarios] = useState<WorkHour[]>([]);
-  const [listLoading, setListLoading] = useState(false);
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [searchDescription, setSearchDescription] = useState("");
 
@@ -110,6 +112,7 @@ export default function HorariosPage() {
 
   const fetchHorarios = async (searchDateParam?: Date, searchDescriptionParam?: string) => {
     setListLoading(true);
+    setListError("");
     try {
       const params = new URLSearchParams();
       if (searchDateParam) params.append('date', dayjs(searchDateParam).format("YYYY-MM-DD"));
@@ -123,9 +126,12 @@ export default function HorariosPage() {
         const data = await response.json();
         setHorarios(data);
         setCurrentPage(1); // Reset para primeira página quando buscar
+      } else {
+        setListError("Não foi possível carregar os registros. Tente buscar novamente.");
       }
     } catch (error) {
       console.error("Erro ao buscar horários:", error);
+      setListError("Não foi possível carregar os registros. Verifique sua conexão e tente novamente.");
     }
     setListLoading(false);
   };
@@ -133,6 +139,13 @@ export default function HorariosPage() {
   useEffect(() => {
     if (user) fetchHorarios();
   }, [user]);
+
+  useEffect(() => {
+    if (status === "authenticated" && new URLSearchParams(window.location.search).get("novo") === "1") {
+      setShowModal(true);
+      router.replace("/horarios", { scroll: false });
+    }
+  }, [status, router]);
 
   const openModal = (workHour?: WorkHour) => {
     if (workHour) {
@@ -162,14 +175,16 @@ export default function HorariosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     setFormError("");
     setSuccess("");
 
-    if (!start || !end) {
-      setFormError("Entrada e saída são obrigatórios.");
+    if (!date || !start || !end) {
+      setFormError("Informe a data, a entrada e a saída.");
       return;
     }
 
+    setSaving(true);
     try {
       const url = editingHorario ? `/api/horarios/${editingHorario.id}` : "/api/horarios";
       const method = editingHorario ? "PUT" : "POST";
@@ -197,6 +212,8 @@ export default function HorariosPage() {
       }
     } catch (_error) {
       setFormError("Erro ao salvar horário");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -262,24 +279,26 @@ export default function HorariosPage() {
   const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       {/* Mensagens */}
       {success && (
         <Alert className="mb-6">
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
+      {listError && <Alert variant="destructive" className="mb-6"><AlertDescription>{listError}</AlertDescription></Alert>}
+      {formError && !showModal && <Alert variant="destructive" className="mb-6"><AlertDescription>{formError}</AlertDescription></Alert>}
 
       {/* Controles de busca */}
       <div className="flex flex-col space-y-4 mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Registros de Horas</h2>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-semibold tracking-tight">Registros de Horas</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Gerencie e visualize seus registros de trabalho
             </p>
           </div>
-          <Button onClick={() => openModal()}>
+          <Button className="self-start" onClick={() => openModal()}>
             <Plus className="w-4 h-4 mr-2" />
             Novo Registro
           </Button>
@@ -296,7 +315,7 @@ export default function HorariosPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-4">
+            <form onSubmit={(event) => { event.preventDefault(); handleSearch(); }} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DatePicker
                   date={searchDate}
@@ -306,11 +325,12 @@ export default function HorariosPage() {
                   className="w-full"
                 />
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
+                  <Label htmlFor="search-description" className="flex items-center gap-2">
                     <Search className="w-4 h-4" />
                     Buscar por descrição
                   </Label>
                   <Input
+                    id="search-description"
                     type="text"
                     placeholder="Digite parte da descrição..."
                     value={searchDescription}
@@ -319,15 +339,15 @@ export default function HorariosPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 justify-end">
-                <Button onClick={handleSearch}>
+                <Button type="submit" disabled={listLoading}>
                   <Search className="w-4 h-4 mr-2" />
                   Buscar
                 </Button>
-                <Button variant="outline" onClick={clearSearch}>
+                <Button type="button" variant="outline" onClick={clearSearch} disabled={listLoading}>
                   Limpar
                 </Button>
               </div>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>
@@ -352,11 +372,13 @@ export default function HorariosPage() {
               </Card>
             ))}
           </div>
-        ) : diasPaginados.length === 0 ? (
+        ) : listError ? null : diasPaginados.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <Clock className="w-24 h-24 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground text-lg">Nenhum horário encontrado</p>
+              <Clock className="size-8 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
+              <h2 className="font-medium">Nenhum horário encontrado</h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{searchDate || searchDescription ? "Experimente outra data ou descrição, ou limpe os filtros." : "Registre sua entrada e saída para começar a acompanhar sua jornada."}</p>
+              <Button variant="outline" className="mt-5" onClick={searchDate || searchDescription ? clearSearch : () => openModal()}>{searchDate || searchDescription ? "Limpar filtros" : "Criar primeiro registro"}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -364,11 +386,11 @@ export default function HorariosPage() {
             {diasPaginados.map(([data, horariosData]) => (
               <Card key={data}>
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-wrap justify-between items-center gap-3">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Calendar className="w-5 h-5" />
-                        {dayjs(data).format("DD/MM/YYYY")} - {dayjs(data).format("dddd")}
+                        {dayjs(data).format("DD/MM/YYYY")} · {dayjs(data).locale("pt-br").format("dddd")}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1 mt-2">
                         <Clock className="w-4 h-4" />
@@ -394,12 +416,12 @@ export default function HorariosPage() {
                     <TableBody>
                       {horariosData.map((horario) => (
                         <TableRow key={horario.id}>
-                          <TableCell className="font-medium">{horario.start_time}</TableCell>
-                          <TableCell className="font-medium">{horario.end_time}</TableCell>
-                          <TableCell className="font-bold">
+                          <TableCell className="font-medium tabular-nums">{horario.start_time.slice(0, 5)}</TableCell>
+                          <TableCell className="font-medium tabular-nums">{horario.end_time.slice(0, 5)}</TableCell>
+                          <TableCell className="font-semibold tabular-nums">
                             {calculateTotalHours(horario.start_time, horario.end_time)}
                           </TableCell>
-                          <TableCell className="max-w-xs truncate hidden md:table-cell">
+                          <TableCell className="max-w-xs truncate hidden md:table-cell" title={horario.description}>
                             {horario.description || "—"}
                           </TableCell>
                           <TableCell className="text-right">
@@ -408,6 +430,7 @@ export default function HorariosPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => openModal(horario)}
+                                aria-label={`Editar registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -415,6 +438,7 @@ export default function HorariosPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDelete(horario.id)}
+                                aria-label={`Excluir registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -431,7 +455,7 @@ export default function HorariosPage() {
 
             {/* Paginação */}
             {totalPaginas > 1 && (
-              <div className="flex items-center justify-center space-x-2 py-4">
+              <nav aria-label="Paginação dos registros" className="flex flex-wrap items-center justify-center gap-2 py-4">
                 <Button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
@@ -442,10 +466,12 @@ export default function HorariosPage() {
                 </Button>
 
                 <div className="flex space-x-1">
-                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).filter(page => Math.abs(page - currentPage) <= 1).map((page) => (
                     <Button
                       key={page}
                       onClick={() => setCurrentPage(page)}
+                      aria-label={`Página ${page}`}
+                      aria-current={currentPage === page ? "page" : undefined}
                       variant={currentPage === page ? "default" : "outline"}
                       size="sm"
                     >
@@ -462,7 +488,7 @@ export default function HorariosPage() {
                 >
                   Próxima
                 </Button>
-              </div>
+              </nav>
             )}
 
             {/* Informações da paginação */}
@@ -541,8 +567,9 @@ export default function HorariosPage() {
               </Alert>
             )}
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1">
-                {editingHorario ? "Atualizar" : "Salvar"}
+              <Button type="submit" className="flex-1" disabled={saving || !!success}>
+                {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {saving ? "Salvando..." : editingHorario ? "Atualizar" : "Salvar"}
               </Button>
               <Button type="button" variant="outline" onClick={closeModal} className="flex-1">
                 Cancelar

@@ -34,15 +34,19 @@ export function DatePicker({
   disabled = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
+  const triggerId = React.useId()
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {label && (
-        <Label className="text-sm font-medium">{label}</Label>
+        <Label htmlFor={triggerId} className="text-sm font-medium">{label}</Label>
       )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={triggerId}
+            type="button"
+            aria-label={label ? undefined : "Selecionar data"}
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal",
@@ -57,6 +61,7 @@ export function DatePicker({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
+            locale={ptBR}
             mode="single"
             selected={date}
             onSelect={(selectedDate) => {
@@ -98,17 +103,21 @@ export function DateTimePicker({
   disabled = false,
 }: DateTimePickerProps) {
   const [dateOpen, setDateOpen] = React.useState(false)
+  const dateId = React.useId()
+  const timeId = React.useId()
 
   return (
-    <div className={cn("flex gap-4", className)}>
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm font-medium">{dateLabel}</Label>
+    <div className={cn("grid grid-cols-2 gap-4", className)}>
+      <div className="flex min-w-0 flex-col gap-2">
+        <Label htmlFor={dateId} className="text-sm font-medium">{dateLabel}</Label>
         <Popover open={dateOpen} onOpenChange={setDateOpen}>
           <PopoverTrigger asChild>
             <Button
+              id={dateId}
+              type="button"
               variant="outline"
               className={cn(
-                "w-32 justify-between font-normal",
+                "w-full justify-between px-2 font-normal sm:px-3",
                 !date && "text-muted-foreground"
               )}
               disabled={disabled}
@@ -119,6 +128,7 @@ export function DateTimePicker({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
+              locale={ptBR}
               mode="single"
               selected={date}
               onSelect={(selectedDate) => {
@@ -131,15 +141,16 @@ export function DateTimePicker({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm font-medium">{timeLabel}</Label>
+      <div className="flex min-w-0 flex-col gap-2">
+        <Label htmlFor={timeId} className="text-sm font-medium">{timeLabel}</Label>
         <Input
+          id={timeId}
           type="time"
           value={time}
           onChange={(e) => onTimeChange?.(e.target.value)}
           placeholder={timePlaceholder}
           disabled={disabled}
-          className="w-32"
+          className="w-full"
         />
       </div>
     </div>

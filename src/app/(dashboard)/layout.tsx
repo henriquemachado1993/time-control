@@ -8,7 +8,7 @@ export default function DashboardLayout({
   return (
     <>
       <Navigation />
-      <main>{children}</main>
+      <main id="conteudo" tabIndex={-1} className="min-h-[calc(100dvh-4.5rem)] outline-none">{children}</main>
     </>
   );
 }

@@ -11,11 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { Banknote, Timer, TrendingUp, Plus, Edit, Trash2 } from "lucide-react";
+import { Banknote, Timer, TrendingUp, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { formatHours } from "@/lib/hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type User = any;
@@ -60,18 +60,13 @@ export default function HorasExtrasPage() {
   // Estados da interface
   const [success, setSuccess] = useState("");
   const [formError, setFormError] = useState("");
+  const [dataError, setDataError] = useState("");
+  const [dataLoading, setDataLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Estados para exclusão de uso de horas extras
   const [confirmDeleteUsoOpen, setConfirmDeleteUsoOpen] = useState(false);
   const [usoToDelete, setUsoToDelete] = useState<string | null>(null);
-
-  // Função para formatar horas em formato legível
-  const formatHours = (hours: number) => {
-    const totalMinutes = hours * 60;
-    const hoursPart = Math.floor(totalMinutes / 60);
-    const minutesPart = Math.round(totalMinutes % 60);
-    return `${hoursPart}h ${minutesPart}min`;
-  };
 
   // Função para converter horas:minutos para decimal
   const parseHoursInput = (input: string) => {
@@ -110,9 +105,12 @@ export default function HorasExtrasPage() {
       if (response.ok) {
         const data = await response.json();
         setHorasExtrasDisponiveis(data);
+      } else {
+        setDataError("Não foi possível carregar o saldo. Recarregue os dados para tentar novamente.");
       }
     } catch (error) {
       console.error("Erro ao buscar horas extras disponíveis:", error);
+      setDataError("Não foi possível carregar o saldo. Verifique sua conexão e tente novamente.");
     }
   };
 
@@ -122,16 +120,18 @@ export default function HorasExtrasPage() {
       if (response.ok) {
         const data = await response.json();
         setUsosHorasExtras(data);
+      } else {
+        setDataError("Não foi possível carregar o histórico. Recarregue os dados para tentar novamente.");
       }
     } catch (error) {
       console.error("Erro ao buscar usos de horas extras:", error);
+      setDataError("Não foi possível carregar o histórico. Verifique sua conexão e tente novamente.");
     }
   };
 
   useEffect(() => {
     if (user) {
-      fetchHorasExtrasDisponiveis();
-      fetchUsosHorasExtras();
+      Promise.all([fetchHorasExtrasDisponiveis(), fetchUsosHorasExtras()]).finally(() => setDataLoading(false));
     }
   }, [user]);
 
@@ -163,11 +163,12 @@ export default function HorasExtrasPage() {
   // Submissão de formulários de horas extras
   const handleSubmitUso = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     setFormError("");
     setSuccess("");
 
     const horasNum = parseHoursInput(usoHoras);
-    if (!horasNum || horasNum <= 0) {
+    if (!Number.isFinite(horasNum) || horasNum <= 0) {
       setFormError("Horas utilizadas deve ser um valor positivo.");
       return;
     }
@@ -178,6 +179,12 @@ export default function HorasExtrasPage() {
       return;
     }
 
+    if (!usoData) {
+      setFormError("Selecione a data do uso.");
+      return;
+    }
+
+    setSaving(true);
     try {
       const url = editingUso ? `/api/horas-extras/uso/${editingUso.id}` : "/api/horas-extras/uso";
       const method = editingUso ? "PUT" : "POST";
@@ -205,6 +212,8 @@ export default function HorasExtrasPage() {
       }
     } catch (_error) {
       setFormError("Erro ao salvar uso");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -255,33 +264,35 @@ export default function HorasExtrasPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       {/* Mensagens */}
       {success && (
         <Alert className="mb-6">
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
+      {dataError && <Alert variant="destructive" className="mb-6"><AlertDescription>{dataError}</AlertDescription><Button variant="outline" className="mt-3" disabled={dataLoading} onClick={async () => { setDataError(""); setDataLoading(true); await Promise.all([fetchHorasExtrasDisponiveis(), fetchUsosHorasExtras()]); setDataLoading(false); }}>Recarregar dados</Button></Alert>}
+      {formError && !showUsoModal && <Alert variant="destructive" className="mb-6"><AlertDescription>{formError}</AlertDescription></Alert>}
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Horas Extras</h2>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-semibold tracking-tight">Horas Extras</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Controle e gerenciamento das suas horas extras
             </p>
           </div>
         </div>
 
         {/* Cards de Resumo */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-busy={dataLoading}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Horas Disponíveis</CardTitle>
               <Banknote className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.available) : "0h 0min"}</div>
+              <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.available) : "—"}</div>
               <p className="text-xs text-muted-foreground">
                 Saldo atual de horas extras
               </p>
@@ -294,7 +305,7 @@ export default function HorasExtrasPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_generated) : "0h 0min"}</div>
+              <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_generated) : "—"}</div>
               <p className="text-xs text-muted-foreground">
                 Total acumulado de extras
               </p>
@@ -307,7 +318,7 @@ export default function HorasExtrasPage() {
               <Timer className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_used) : "0h 0min"}</div>
+              <div className="text-2xl font-semibold tabular-nums">{dataLoading ? <Skeleton className="h-8 w-28" /> : horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.total_used) : "—"}</div>
               <p className="text-xs text-muted-foreground">
                 Total já utilizado
               </p>
@@ -318,9 +329,9 @@ export default function HorasExtrasPage() {
         {/* Registro de Usos */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center">
               <div>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 leading-snug">
                   <Timer className="w-5 h-5" />
                   Registro de Uso de Horas Extras
                 </CardTitle>
@@ -330,7 +341,8 @@ export default function HorasExtrasPage() {
               </div>
               <Button
                 onClick={() => openUsoModal()}
-                disabled={!horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0}
+                className="self-start"
+                disabled={dataLoading || !!dataError || !horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Registrar Uso
@@ -338,7 +350,7 @@ export default function HorasExtrasPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {usosHorasExtras.length === 0 ? (
+            {dataLoading ? <div className="space-y-3" aria-label="Carregando histórico"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : dataError ? null : usosHorasExtras.length === 0 ? (
               <div className="text-center py-8">
                 <Timer className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">
@@ -357,8 +369,8 @@ export default function HorasExtrasPage() {
             ) : (
               <div className="space-y-4">
                 {usosHorasExtras.slice(0, 10).map((uso) => (
-                  <div key={uso.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
+                  <div key={uso.id} className="flex flex-wrap items-center justify-between gap-3 border-b py-4 last:border-b-0">
+                    <div className="min-w-0 space-y-1">
                       <p className="font-medium">
                         {formatHours(uso.hours_used)} utilizadas em {dayjs(uso.date).format("DD/MM/YYYY")}
                       </p>
@@ -366,7 +378,7 @@ export default function HorasExtrasPage() {
                         Valor decimal: {uso.hours_used.toFixed(2)}h
                       </p> */}
                       {uso.description && (
-                        <p className="text-sm text-muted-foreground">{uso.description}</p>
+                        <p className="text-sm text-muted-foreground break-words">{uso.description}</p>
                       )}
                     </div>
                     <div className="flex gap-1">
@@ -374,6 +386,7 @@ export default function HorasExtrasPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => openUsoModal(uso)}
+                        aria-label={`Editar uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -381,6 +394,7 @@ export default function HorasExtrasPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteUso(uso.id)}
+                        aria-label={`Excluir uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -447,13 +461,13 @@ export default function HorasExtrasPage() {
                 <p>Formatos aceitos: 4.65 (decimal) ou 4:30 (horas:minutos)</p>
                 <p>Máximo disponível: {horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.available) : "0h 0min"}</p>
                 {usoHoras && parseHoursInput(usoHoras) > 0 && (
-                  <p className="text-blue-600">
+                  <p className="font-medium text-foreground">
                     Convertido: {formatHours(parseHoursInput(usoHoras))}
                   </p>
                 )}
                 {usoHoras && parseHoursInput(usoHoras) > (horasExtrasDisponiveis?.available || 0) && (
-                  <p className="text-red-600">
-                    ⚠️ Valor excede o disponível!
+                  <p className="text-destructive">
+                    Valor excede o disponível.
                   </p>
                 )}
               </div>
@@ -479,8 +493,9 @@ export default function HorasExtrasPage() {
               </Alert>
             )}
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1">
-                {editingUso ? "Atualizar" : "Registrar"}
+              <Button type="submit" className="flex-1" disabled={saving || !!success}>
+                {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {saving ? "Salvando..." : editingUso ? "Atualizar" : "Registrar"}
               </Button>
               <Button type="button" variant="outline" onClick={closeUsoModal} className="flex-1">
                 Cancelar

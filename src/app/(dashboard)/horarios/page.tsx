@@ -338,7 +338,7 @@ export default function HorariosPage() {
   const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="max-w-layout mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       {/* Mensagens */}
       {success && (
         <Alert className="mb-6">
@@ -353,7 +353,7 @@ export default function HorariosPage() {
       <div className="flex flex-col space-y-4 mb-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Registros de Horas</h1>
+            <h1 className="text-[32px] leading-10 font-semibold tracking-tight">Registros de Horas</h1>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Gerencie e visualize seus registros de trabalho
             </p>

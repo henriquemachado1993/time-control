@@ -55,10 +55,10 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="mx-auto max-w-layout space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <h1 className="text-[32px] leading-10 font-semibold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground sm:text-base">Visão geral do seu controle de horas e produtividade</p>
         </div>
         <Button asChild className="h-10 self-start"><Link href="/horarios?novo=1"><IconPlus aria-hidden="true" />Novo Registro</Link></Button>

@@ -264,7 +264,7 @@ export default function HorasExtrasPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="max-w-layout mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       {/* Mensagens */}
       {success && (
         <Alert className="mb-6">
@@ -277,7 +277,7 @@ export default function HorasExtrasPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Horas Extras</h1>
+            <h1 className="text-[32px] leading-10 font-semibold tracking-tight">Horas Extras</h1>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Controle e gerenciamento das suas horas extras
             </p>

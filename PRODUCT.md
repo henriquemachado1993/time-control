@@ -31,6 +31,7 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 - O banco de horas calcula horas extras a partir do total trabalhado por dia e permite anotar seu uso. O formulário de uso aceita horas decimais ou o formato horas:minutos.
 - A pessoa pode editar e excluir seus registros. Excluir um uso de horas extras devolve a quantidade ao saldo disponível.
 - O painel mostra totais calculados a partir do histórico e um resumo de horas extras geradas, utilizadas e disponíveis.
+- O painel oferece um calendário mensal com os períodos de cada dia, um gráfico diário de horas trabalhadas comparado à jornada configurada e uma comparação mensal de horas extras geradas e utilizadas nos seis meses até o mês selecionado. Dias sem registro são apresentados sem inferir ausência ou folga; os gráficos também disponibilizam os valores em tabela.
 
 ## Capabilities and Constraints
 

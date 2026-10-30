@@ -10,10 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { IconArrowRight, IconCalendarWeek, IconClock, IconPlus, IconRefresh, IconStopwatch } from "@tabler/icons-react";
 import { formatHours, workedHours } from "@/lib/hours";
+import { DashboardInsights, type DashboardOvertimeUsage, type DashboardWorkHour } from "@/components/dashboard-insights";
 
-type WorkHour = { id: string; date: string; start_time: string; end_time: string; description?: string };
-type ExtraHours = { available: number; total_generated: number; total_used: number };
-type DashboardData = { records: WorkHour[]; bank: ExtraHours };
+type ExtraHours = { available: number; total_generated: number; total_used: number; breakdown_by_date: Record<string, number> };
+type DashboardData = { records: DashboardWorkHour[]; bank: ExtraHours; dailyTargetMinutes: number; usages: DashboardOvertimeUsage[] };
 const dateLabel = (date: string) => new Date(`${date.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", weekday: "short" });
 
 export default function DashboardPage() {
@@ -27,10 +27,16 @@ export default function DashboardPage() {
     setLoading(true);
     setError(false);
     try {
-      const [workResponse, bankResponse] = await Promise.all([fetch("/api/horarios"), fetch("/api/horas-extras/disponivel")]);
-      if (!workResponse.ok || !bankResponse.ok) throw new Error("Falha ao carregar o painel");
-      const [records, bank]: [WorkHour[], ExtraHours] = await Promise.all([workResponse.json(), bankResponse.json()]);
-      setData({ records, bank });
+      const [workResponse, bankResponse, targetResponse, usagesResponse] = await Promise.all([
+        fetch("/api/horarios"),
+        fetch("/api/horas-extras/disponivel"),
+        fetch("/api/configuracoes/jornada"),
+        fetch("/api/horas-extras/uso"),
+      ]);
+      if ([workResponse, bankResponse, targetResponse, usagesResponse].some(response => !response.ok)) throw new Error("Falha ao carregar o painel");
+      const [records, bank, target, usages]: [DashboardWorkHour[], ExtraHours, { dailyTargetMinutes: number }, DashboardOvertimeUsage[]] = await Promise.all([workResponse.json(), bankResponse.json(), targetResponse.json(), usagesResponse.json()]);
+      if (!Number.isInteger(target.dailyTargetMinutes) || target.dailyTargetMinutes < 1 || target.dailyTargetMinutes > 1440) throw new Error("Jornada diária inválida");
+      setData({ records, bank, dailyTargetMinutes: target.dailyTargetMinutes, usages });
     } catch {
       setError(true);
     } finally {
@@ -80,6 +86,8 @@ export default function DashboardPage() {
               </div>
             ))}
           </dl>
+
+          <DashboardInsights records={records} dailyTargetMinutes={data?.dailyTargetMinutes ?? 480} generatedHoursByDate={data?.bank.breakdown_by_date ?? {}} usages={data?.usages ?? []} loading={loading} />
 
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card className="min-w-0 gap-0 overflow-hidden">

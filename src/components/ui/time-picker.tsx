@@ -30,7 +30,7 @@ export function TimePicker({
 
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
-      <Label htmlFor={inputId} className="text-sm font-medium">
+      <Label htmlFor={inputId}>
         {label}
       </Label>
       <Input

@@ -49,7 +49,7 @@ export function DatePicker({
             aria-label={label ? undefined : "Selecionar data"}
             variant="outline"
             className={cn(
-              "w-full justify-start text-left font-normal",
+              "w-full justify-start rounded-lg border-input bg-field text-left font-normal shadow-xs hover:bg-field",
               !date && "text-muted-foreground"
             )}
             disabled={disabled}
@@ -114,7 +114,7 @@ export function DateTimePicker({
               type="button"
               variant="outline"
               className={cn(
-                "w-full justify-between px-2 font-normal sm:px-3",
+                "w-full justify-between rounded-lg border-input bg-field px-2 font-normal shadow-xs hover:bg-field sm:px-3",
                 !date && "text-muted-foreground"
               )}
               disabled={disabled}

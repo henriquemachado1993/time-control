@@ -22,7 +22,7 @@ export async function GET() {
 
     // Buscar todos os horários do usuário
     const workHours = await prisma.work_hours.findMany({
-      where: { user_id: user.id },
+      where: { user_id: user.id, end_time: { not: null } },
       orderBy: { date: "asc" },
     });
 
@@ -30,6 +30,8 @@ export async function GET() {
     const workedHoursByDate: { [key: string]: number } = {};
 
     workHours.forEach(hour => {
+      if (!hour.end_time) return;
+
       const start = new Date(`2000-01-01T${hour.start_time}`);
       const end = new Date(`2000-01-01T${hour.end_time}`);
       const workedMinutes = (end.getTime() - start.getTime()) / (1000 * 60);

@@ -14,7 +14,7 @@ export type DashboardWorkHour = {
   id: string;
   date: string;
   start_time: string;
-  end_time: string;
+  end_time: string | null;
   description?: string | null;
 };
 
@@ -224,7 +224,7 @@ export function DashboardInsights({ records, dailyTargetMinutes, generatedHoursB
               <h3 className="text-sm font-medium first-letter:uppercase">{dayLabel(selectedDate)}</h3>
               {selected ? <>
                 <div><p className="text-xl font-semibold tabular-nums">{formatHours(selected.minutes / 60)}<span className="ml-2 text-xs font-normal text-muted-foreground">trabalhadas</span></p><p className="mt-1 text-xs text-muted-foreground">{selectedExtras > 0 ? `${formatHours(selectedExtras / 60)} de horas extras geradas.` : selected.minutes >= dailyTargetMinutes ? "Jornada diária completa." : `${formatHours((dailyTargetMinutes - selected.minutes) / 60)} para completar a jornada.`}</p></div>
-                <ul className="divide-y">{[...selected.records].sort((a, b) => a.start_time.localeCompare(b.start_time)).map(record => <li key={record.id} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"><div className="min-w-0"><p className="text-sm tabular-nums">{record.start_time.slice(0, 5)} – {record.end_time.slice(0, 5)}</p>{record.description && <p className="mt-1 break-words text-xs text-muted-foreground">{record.description}</p>}</div><span className="shrink-0 text-xs text-muted-foreground tabular-nums">{formatHours(workedMinutes(record.start_time, record.end_time) / 60)}</span></li>)}</ul>
+                <ul className="divide-y">{[...selected.records].sort((a, b) => a.start_time.localeCompare(b.start_time)).map(record => <li key={record.id} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"><div className="min-w-0"><p className="text-sm tabular-nums">{record.start_time.slice(0, 5)} – {record.end_time?.slice(0, 5) ?? "Em andamento"}</p>{record.description && <p className="mt-1 break-words text-xs text-muted-foreground">{record.description}</p>}</div><span className="shrink-0 text-xs text-muted-foreground tabular-nums">{record.end_time ? formatHours(workedMinutes(record.start_time, record.end_time) / 60) : "Em andamento"}</span></li>)}</ul>
               </> : <p className="text-sm text-muted-foreground">Nenhum horário registrado neste dia.</p>}
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">Dias sem registro não indicam ausência ou folga. O calendário mostra os horários que você informou.</p>

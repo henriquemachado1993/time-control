@@ -1,7 +1,7 @@
 export type WorkInterval = {
   id: string;
   start_time: string;
-  end_time: string;
+  end_time: string | null;
 };
 
 export function isValidWorkDate(value: unknown): value is string {
@@ -42,7 +42,17 @@ export function findOverlappingWorkIntervals(
     if (interval.id === excludedId) return false;
 
     const existingStart = timeToMinutes(interval.start_time);
-    const existingEnd = timeToMinutes(interval.end_time);
+    const existingEnd = interval.end_time ? timeToMinutes(interval.end_time) : 24 * 60;
     return startMinutes < existingEnd && endMinutes > existingStart;
+  });
+}
+
+export function findWorkIntervalsAtTime(intervals: WorkInterval[], time: string) {
+  const timeMinutes = timeToMinutes(time);
+
+  return intervals.filter((interval) => {
+    const startMinutes = timeToMinutes(interval.start_time);
+    const endMinutes = interval.end_time ? timeToMinutes(interval.end_time) : 24 * 60;
+    return timeMinutes >= startMinutes && timeMinutes < endMinutes;
   });
 }

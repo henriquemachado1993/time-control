@@ -27,6 +27,7 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 - Aplicação web com interface e textos em português brasileiro.
 - A pessoa cria uma conta individual e acessa seus dados mediante autenticação.
 - Um registro de trabalho contém data, entrada, saída e descrição opcional. É possível registrar mais de um período no mesmo dia; os períodos precisam terminar depois da entrada e não podem se sobrepor.
+- O ponto rápido registra a entrada com a data e a hora atuais e permite encerrar o período depois. Enquanto a saída estiver em aberto, o período não entra nos cálculos de horas trabalhadas nem no saldo de horas extras. Se a pessoa esquecer a saída, pode completá-la pela edição do registro; só pode haver um período aberto por conta.
 - As horas podem ser filtradas por data, descrição ou períodos rápidos de hoje, semana e mês. O histórico agrupa os períodos por dia, apresenta até cinco dias por página e preserva a página ao editar ou excluir.
 - O banco de horas calcula horas extras a partir do total trabalhado por dia e permite anotar seu uso. O formulário de uso aceita horas e minutos ou horas decimais com ponto ou vírgula. O extrato mostra geração e uso, com filtros por período e descrição e paginação.
 - A pessoa pode editar e excluir seus registros. Excluir um uso de horas extras devolve a quantidade ao saldo disponível.
@@ -37,6 +38,7 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 
 - Autenticação por e-mail e senha, com criação de conta e proteção dos dados por usuário.
 - Gerenciamento de registros de trabalho: criação, edição, exclusão, filtro por data e descrição, agrupamento diário e paginação.
+- Registro rápido de entrada e saída, com períodos em aberto editáveis e excluídos dos totais até o encerramento.
 - Resumo geral das horas trabalhadas, dos dias registrados, da média diária e do banco de horas.
 - Gerenciamento de horas extras disponíveis e dos respectivos usos, com histórico e devolução ao saldo ao excluir um uso.
 - A jornada diária agora é configurável por conta, com padrão de oito horas. A meta é aplicada à lista de horários e aos cálculos de saldo de horas extras; alterar a meta recalcula o histórico.

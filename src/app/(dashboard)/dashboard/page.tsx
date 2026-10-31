@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { IconArrowRight, IconCalendarWeek, IconClock, IconPlus, IconRefresh, IconStopwatch } from "@tabler/icons-react";
 import { formatHours, workedHours } from "@/lib/hours";
+import { ClockPunch } from "@/components/clock-punch";
 import { DashboardInsights, type DashboardOvertimeUsage, type DashboardWorkHour } from "@/components/dashboard-insights";
 
 type ExtraHours = { available: number; total_generated: number; total_used: number; breakdown_by_date: Record<string, number> };
@@ -51,7 +52,7 @@ export default function DashboardPage() {
 
   const records = data?.records ?? [];
   const totalHours = records.reduce((total, record) => total + workedHours(record.start_time, record.end_time), 0);
-  const totalDays = new Set(records.map(record => record.date.slice(0, 10))).size;
+  const totalDays = new Set(records.filter(record => record.end_time).map(record => record.date.slice(0, 10))).size;
   const recentDays = Array.from(new Set(records.map(record => record.date.slice(0, 10)))).sort((a, b) => b.localeCompare(a)).slice(0, 5);
   const metrics = [
     { label: "Total de Horas", value: formatHours(totalHours), description: "Horas trabalhadas no total" },
@@ -67,8 +68,10 @@ export default function DashboardPage() {
           <h1 className="text-[32px] leading-10 font-semibold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground sm:text-base">Visão geral do seu controle de horas e produtividade</p>
         </div>
-        <Button asChild className="h-10 self-start"><Link href="/horarios?novo=1"><IconPlus aria-hidden="true" />Novo Registro</Link></Button>
+      <ClockPunch onRecordsChanged={() => void loadDashboard()} />
       </div>
+
+   
 
       {error ? (
         <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
@@ -104,7 +107,7 @@ export default function DashboardPage() {
                         return <div key={date} className="flex items-center justify-between gap-3 px-6 py-4">
                           <div className="flex min-w-0 items-center gap-3">
                             <IconCalendarWeek className="hidden size-4 shrink-0 text-muted-foreground sm:block" aria-hidden="true" />
-                            <div className="min-w-0"><p className="text-sm font-medium capitalize">{dateLabel(date)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{dayRecords.length} {dayRecords.length === 1 ? "registro" : "registros"} · {dayRecords.map(record => `${record.start_time.slice(0, 5)}–${record.end_time.slice(0, 5)}`).join(" / ")}</p></div>
+                            <div className="min-w-0"><p className="text-sm font-medium capitalize">{dateLabel(date)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{dayRecords.length} {dayRecords.length === 1 ? "registro" : "registros"} · {dayRecords.map(record => `${record.start_time.slice(0, 5)}–${record.end_time?.slice(0, 5) ?? "Em andamento"}`).join(" / ")}</p></div>
                           </div>
                           <span className="shrink-0 text-sm font-semibold tabular-nums">{formatHours(dayRecords.reduce((total, record) => total + workedHours(record.start_time, record.end_time), 0))}</span>
                         </div>;

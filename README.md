@@ -106,9 +106,10 @@ Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 
 ### Registrando Horários
 1. **Acesse "Registros de Horas"**
-2. **Clique em "Novo Registro"**
-3. **Preencha**: Data, hora de entrada, hora de saída, descrição
-4. **Salve** o registro
+2. **Use "Bater entrada"** para registrar imediatamente a hora atual; depois, use **"Bater saída"** para encerrar o período.
+3. Períodos em andamento aparecem na listagem e podem ser editados para preencher uma saída esquecida. Eles não entram nos totais até serem encerrados.
+4. **Ou clique em "Novo Registro"** para informar os horários manualmente.
+5. Para lançamentos manuais, **preencha** data, entrada, saída e descrição opcional e salve o registro.
 
 ### Gerenciando Horas Extras
 1. **Acesse "Horas Extras"**
@@ -220,5 +221,4 @@ npm run lint         # Executar ESLint
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
-
 

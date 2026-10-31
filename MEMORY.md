@@ -8,7 +8,7 @@ NextAuth authenticates each account. API handlers find the account from the serv
 
 ## Stored time values
 
-`work_hours.date` is stored as a `YYYY-MM-DD` string; `start_time` and `end_time` are strings in 24-hour `HH:mm` format. Preserve local calendar dates when parsing, formatting, or grouping these values. A work day may contain several separate records.
+`work_hours.date` is stored as a `YYYY-MM-DD` string; `start_time` and any populated `end_time` are strings in 24-hour `HH:mm` format. `end_time` is nullable for the one open clock-punch period per user. Do not include open periods in worked-time or overtime calculations; users can complete their exit by editing the record. Preserve local calendar dates when parsing, formatting, or grouping these values. A work day may contain several separate records.
 
 `src/lib/hours.ts` provides shared `formatHours` and `workedHours` helpers for the UI. Keep visible durations in whole minutes and use tabular numerals for totals.
 

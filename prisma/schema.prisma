@@ -19,7 +19,7 @@ model work_hours {
   user_id      String
   date         String
   start_time   String
-  end_time     String
+  end_time     String?
   description  String?
   created_at   DateTime @default(now()) @db.Timestamptz(6)
 

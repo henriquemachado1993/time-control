@@ -3,7 +3,9 @@ export function formatHours(hours: number) {
   return `${hours < 0 ? "−" : ""}${Math.floor(totalMinutes / 60)}h ${String(totalMinutes % 60).padStart(2, "0")}min`;
 }
 
-export function workedMinutes(start: string, end: string) {
+export function workedMinutes(start: string, end: string | null | undefined) {
+  if (!end) return 0;
+
   const [startHours, startMinutes] = start.split(":").map(Number);
   const [endHours, endMinutes] = end.split(":").map(Number);
 
@@ -12,7 +14,7 @@ export function workedMinutes(start: string, end: string) {
   return Math.max(0, endHours * 60 + endMinutes - startHours * 60 - startMinutes);
 }
 
-export function workedHours(start: string, end: string) {
+export function workedHours(start: string, end: string | null | undefined) {
   return workedMinutes(start, end) / 60;
 }
 

@@ -20,6 +20,7 @@ import { TimePicker } from "@/components/ui/time-picker";
 import { Progress } from "@/components/ui/progress";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { IconCalendar, IconPlus, IconSearch, IconEdit, IconTrash, IconClock, IconLoader2, IconAdjustmentsHorizontal } from "@tabler/icons-react";
+import { ClockPunch } from "@/components/clock-punch";
 import { formatDailyTarget, formatHours, parseDailyTarget, workedMinutes } from "@/lib/hours";
 import { findOverlappingWorkIntervals, validateWorkInterval } from "@/lib/work-hours";
 
@@ -29,7 +30,7 @@ type WorkHour = {
   id: string;
   date: string;
   start_time: string;
-  end_time: string;
+  end_time: string | null;
   description?: string;
   created_at: string;
 };
@@ -52,7 +53,7 @@ function getPeriodRange(preset: Exclude<PeriodPreset, "all" | "custom">) {
   return { from: today.startOf("month").format("YYYY-MM-DD"), to: today.endOf("month").format("YYYY-MM-DD") };
 }
 
-function calculateTotalHours(start: string, end: string) {
+function calculateTotalHours(start: string, end: string | null) {
   if (!start || !end) return "-";
   return formatHours(workedMinutes(start, end) / 60);
 }
@@ -286,7 +287,7 @@ export default function HorariosPage() {
       setEditingHorario(workHour);
       setDate(dayjs(workHour.date).toDate());
       setStart(workHour.start_time.slice(0, 5));
-      setEnd(workHour.end_time.slice(0, 5));
+      setEnd(workHour.end_time?.slice(0, 5) ?? "");
       setDescription(workHour.description || "");
     } else {
       setEditingHorario(null);
@@ -580,6 +581,10 @@ export default function HorariosPage() {
         </Card>
       </div>
 
+      <div className="mb-8">
+        <ClockPunch onRecordsChanged={() => void fetchHorarios(activeSearchDate, activeSearchDescription, activePeriodPreset)} />
+      </div>
+
       {!listLoading && !listError && (
         <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
           {horariosFiltrados.length} período{horariosFiltrados.length !== 1 ? "s" : ""} encontrado{horariosFiltrados.length !== 1 ? "s" : ""} em {totalDias} dia{totalDias !== 1 ? "s" : ""}
@@ -697,7 +702,9 @@ export default function HorariosPage() {
                               </details>
                             ) : <span className="mt-1 block text-xs font-normal text-muted-foreground md:hidden">Sem descrição</span>}
                           </TableCell>
-                          <TableCell className="font-medium tabular-nums">{horario.end_time.slice(0, 5)}</TableCell>
+                          <TableCell className={horario.end_time ? "font-medium tabular-nums" : "text-sm text-muted-foreground"}>
+                            {horario.end_time?.slice(0, 5) ?? "Em andamento"}
+                          </TableCell>
                           <TableCell className="font-semibold tabular-nums">
                             {calculateTotalHours(horario.start_time, horario.end_time)}
                           </TableCell>
@@ -711,7 +718,7 @@ export default function HorariosPage() {
                                 size="icon"
                                 className="size-11 md:size-9"
                                 onClick={() => openModal(horario)}
-                                aria-label={`Editar registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
+                                aria-label={`Editar registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time?.slice(0, 5) ?? "em andamento"}`}
                               >
                                 <IconEdit className="w-4 h-4" />
                               </Button>
@@ -720,7 +727,7 @@ export default function HorariosPage() {
                                 size="icon"
                                 className="size-11 text-destructive hover:text-destructive md:size-9"
                                 onClick={() => handleDelete(horario)}
-                                aria-label={`Excluir registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
+                                aria-label={`Excluir registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time?.slice(0, 5) ?? "em andamento"}`}
                               >
                                 <IconTrash className="w-4 h-4" />
                               </Button>
@@ -870,7 +877,7 @@ export default function HorariosPage() {
                 {intervalCheckError && <p role="alert" className="text-destructive">{intervalCheckError}</p>}
                 {overlappingIntervals.map((interval) => (
                   <p key={interval.id} role="alert" className="text-destructive">
-                    Conflito com {interval.start_time.slice(0, 5)}–{interval.end_time.slice(0, 5)}. Ajuste os horários para não contar o mesmo tempo duas vezes.
+                    Conflito com {interval.start_time.slice(0, 5)}–{interval.end_time?.slice(0, 5) ?? "em andamento"}. Ajuste os horários para não contar o mesmo tempo duas vezes.
                   </p>
                 ))}
               </div>
@@ -922,7 +929,7 @@ export default function HorariosPage() {
         }}
         title="Excluir Horário"
         description={itemToDelete
-          ? `Excluir o período de ${itemToDelete.start_time.slice(0, 5)} a ${itemToDelete.end_time.slice(0, 5)} em ${dayjs(`${itemToDelete.date}T12:00`).format("DD/MM/YYYY")}? O total do dia e o saldo de extras serão recalculados.`
+          ? `Excluir o período de ${itemToDelete.start_time.slice(0, 5)} a ${itemToDelete.end_time?.slice(0, 5) ?? "em andamento"} em ${dayjs(`${itemToDelete.date}T12:00`).format("DD/MM/YYYY")}? O total do dia e o saldo de extras serão recalculados.`
           : "Esta ação não pode ser desfeita."}
         confirmText="Excluir"
         cancelText="Cancelar"

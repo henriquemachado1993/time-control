@@ -39,7 +39,7 @@ export function DatePicker({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {label && (
-        <Label htmlFor={triggerId} className="text-sm font-medium">{label}</Label>
+        <Label htmlFor={triggerId}>{label}</Label>
       )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -106,7 +106,7 @@ export function DateTimePicker({
   return (
     <div className={cn("grid grid-cols-2 gap-4", className)}>
       <div className="flex min-w-0 flex-col gap-2">
-        <Label htmlFor={dateId} className="text-sm font-medium">{dateLabel}</Label>
+        <Label htmlFor={dateId}>{dateLabel}</Label>
         <Popover open={dateOpen} onOpenChange={setDateOpen}>
           <PopoverTrigger asChild>
             <Button

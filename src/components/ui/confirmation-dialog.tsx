@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { IconAlertTriangle, IconTrash } from "@tabler/icons-react"
+import { IconAlertTriangle, IconLoader2, IconTrash } from "@tabler/icons-react"
 
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/dialog"
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -30,7 +30,9 @@ interface ConfirmationDialogProps {
   confirmText?: string
   cancelText?: string
   variant?: "default" | "destructive"
-  onConfirm: () => void
+  onConfirm: () => void | boolean | Promise<void | boolean>
+  isConfirming?: boolean
+  error?: string
   onCancel?: () => void
   children?: React.ReactNode
 }
@@ -44,17 +46,21 @@ export function ConfirmationDialog({
   cancelText = "Cancelar",
   variant = "default",
   onConfirm,
+  isConfirming = false,
+  error,
   onCancel,
   children,
 }: ConfirmationDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  const handleConfirm = () => {
-    onConfirm()
-    onOpenChange(false)
+  const handleConfirm = async () => {
+    if (isConfirming) return
+    const completed = await onConfirm()
+    if (completed !== false) onOpenChange(false)
   }
 
   const handleCancel = () => {
+    if (isConfirming) return
     onCancel?.()
     onOpenChange(false)
   }
@@ -75,18 +81,22 @@ export function ConfirmationDialog({
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           {children}
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
           <div className="flex gap-2 pt-4">
             <Button
               onClick={handleConfirm}
               variant={variant === "destructive" ? "destructive" : "default"}
               className="flex-1"
+              disabled={isConfirming}
             >
-              {confirmText}
+              {isConfirming && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
+              {isConfirming ? "Excluindo..." : confirmText}
             </Button>
             <Button
               onClick={handleCancel}
               variant="outline"
               className="flex-1"
+              disabled={isConfirming}
             >
               {cancelText}
             </Button>
@@ -112,17 +122,18 @@ export function ConfirmationDialog({
         </DrawerHeader>
         <div className="px-4">
           {children}
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
         </div>
         <DrawerFooter className="pt-2">
           <Button
             onClick={handleConfirm}
             variant={variant === "destructive" ? "destructive" : "default"}
+            disabled={isConfirming}
           >
-            {confirmText}
+            {isConfirming && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
+            {isConfirming ? "Excluindo..." : confirmText}
           </Button>
-          <DrawerClose asChild>
-            <Button variant="outline">{cancelText}</Button>
-          </DrawerClose>
+          <Button variant="outline" onClick={handleCancel} disabled={isConfirming}>{cancelText}</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

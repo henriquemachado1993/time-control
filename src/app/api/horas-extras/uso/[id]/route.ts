@@ -26,9 +26,9 @@ export async function PUT(
     const { date, hours_used, description } = await request.json();
     const { id } = await params;
 
-    if (!date || !hours_used || typeof hours_used !== 'number') {
+    if (!date || typeof hours_used !== 'number' || !Number.isFinite(hours_used) || hours_used <= 0) {
       return NextResponse.json({
-        error: "Data e horas utilizadas são obrigatórios. Horas devem ser um número"
+        error: "Informe a data e uma quantidade positiva de horas"
       }, { status: 400 });
     }
 
@@ -88,14 +88,15 @@ export async function PUT(
     const totalUsedHours = usedHours._sum.hours_used || 0;
     const availableHours = totalExtraHoursGenerated - totalUsedHours;
 
-    if (hours_used > availableHours) {
+    const maxAllowedHours = Math.max(availableHours, existingUsage.hours_used);
+    if (hours_used > maxAllowedHours) {
       return NextResponse.json({
-        error: `Horas insuficientes. Você tem ${availableHours.toFixed(2)}h disponíveis`
+        error: `Horas insuficientes. Você pode manter até ${maxAllowedHours.toFixed(2)}h neste registro`
       }, { status: 400 });
     }
 
     const uso = await prisma.extra_hours_usage.update({
-      where: { id },
+      where: { id, user_id: user.id },
       data: {
         bank_id: "auto-calculated", // Manter compatibilidade
         date,
@@ -155,7 +156,7 @@ export async function DELETE(
     }
 
     await prisma.extra_hours_usage.delete({
-      where: { id },
+      where: { id, user_id: user.id },
     });
 
     return NextResponse.json({ message: "Uso de horas extras excluído com sucesso" });

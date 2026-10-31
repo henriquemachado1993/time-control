@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
 
     const { date, hours_used, description } = await request.json();
 
-    if (!date || !hours_used || typeof hours_used !== 'number') {
+    if (!date || typeof hours_used !== 'number' || !Number.isFinite(hours_used) || hours_used <= 0) {
       return NextResponse.json({
-        error: "Data e horas utilizadas são obrigatórios. Horas devem ser um número"
+        error: "Informe a data e uma quantidade positiva de horas"
       }, { status: 400 });
     }
 

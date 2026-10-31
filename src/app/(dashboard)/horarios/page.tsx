@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { IconCalendar, IconPlus, IconSearch, IconEdit, IconTrash, IconClock, IconLoader2, IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { formatDailyTarget, formatHours, parseDailyTarget, workedMinutes } from "@/lib/hours";
+import { findOverlappingWorkIntervals, validateWorkInterval } from "@/lib/work-hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type User = any;
@@ -33,21 +34,33 @@ type WorkHour = {
   created_at: string;
 };
 
+type PeriodPreset = "all" | "today" | "week" | "month" | "custom";
+
+function getPeriodRange(preset: Exclude<PeriodPreset, "all" | "custom">) {
+  const today = dayjs().startOf("day");
+
+  if (preset === "today") {
+    const date = today.format("YYYY-MM-DD");
+    return { from: date, to: date };
+  }
+
+  if (preset === "week") {
+    const start = today.subtract((today.day() + 6) % 7, "day");
+    return { from: start.format("YYYY-MM-DD"), to: start.add(6, "day").format("YYYY-MM-DD") };
+  }
+
+  return { from: today.startOf("month").format("YYYY-MM-DD"), to: today.endOf("month").format("YYYY-MM-DD") };
+}
+
 function calculateTotalHours(start: string, end: string) {
   if (!start || !end) return "-";
-  const startTime = dayjs(`2000-01-01T${start}`);
-  const endTime = dayjs(`2000-01-01T${end}`);
-  let diff = endTime.diff(startTime, "minute");
-  if (diff < 0) diff = 0;
-  const h = Math.floor(diff / 60);
-  const m = diff % 60;
-  return `${h}h ${m}min`;
+  return formatHours(workedMinutes(start, end) / 60);
 }
 
 function groupByDate(workHours: WorkHour[]) {
   const groups: { [key: string]: WorkHour[] } = {};
   workHours.forEach(workHour => {
-    const data = dayjs(workHour.date).format("YYYY-MM-DD");
+    const data = workHour.date.slice(0, 10);
     if (!groups[data]) {
       groups[data] = [];
     }
@@ -94,10 +107,17 @@ export default function HorariosPage() {
   const [targetError, setTargetError] = useState("");
   const [searchDate, setSearchDate] = useState<Date | undefined>(undefined);
   const [searchDescription, setSearchDescription] = useState("");
+  const [activeSearchDescription, setActiveSearchDescription] = useState("");
+  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>("all");
+  const [activeSearchDate, setActiveSearchDate] = useState<Date | undefined>(undefined);
+  const [activePeriodPreset, setActivePeriodPreset] = useState<PeriodPreset>("all");
+  const [dayIntervals, setDayIntervals] = useState<{ dateKey: string; records: WorkHour[]; loading: boolean; error?: string } | null>(null);
 
   // Estados do diálogo de confirmação
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<WorkHour | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -166,32 +186,45 @@ export default function HorariosPage() {
     }
   }, [session, status, router]);
 
-  const fetchHorarios = async (searchDateParam?: Date, searchDescriptionParam?: string) => {
+  const fetchHorarios = async (
+    searchDateParam?: Date,
+    searchDescriptionParam?: string,
+    preset: PeriodPreset = "all",
+    resetPage = false,
+  ) => {
     setListLoading(true);
     setListError("");
+
     try {
       const params = new URLSearchParams();
-      if (searchDateParam) params.append('date', dayjs(searchDateParam).format("YYYY-MM-DD"));
-      if (searchDescriptionParam) params.append('description', searchDescriptionParam);
-
-      const url = params.toString()
-        ? `/api/horarios?${params.toString()}`
-        : "/api/horarios";
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setHorarios(data);
-        setCurrentPage(1); // Reset para primeira página quando buscar
-      } else {
-        setListError("Não foi possível carregar os registros. Tente buscar novamente.");
+      if (searchDateParam) {
+        params.set("date", dayjs(searchDateParam).format("YYYY-MM-DD"));
+      } else if (preset !== "all" && preset !== "custom") {
+        const range = getPeriodRange(preset);
+        params.set("dateFrom", range.from);
+        params.set("dateTo", range.to);
       }
+
+      const query = params.toString();
+      const response = await fetch(query ? `/api/horarios?${query}` : "/api/horarios");
+      if (!response.ok) {
+        setListError("Não foi possível carregar os registros. Tente buscar novamente.");
+        return;
+      }
+
+      const data = await response.json();
+      setHorarios(data);
+      setActiveSearchDescription((searchDescriptionParam || "").trim());
+      setActiveSearchDate(searchDateParam);
+      setActivePeriodPreset(preset);
+      if (resetPage) setCurrentPage(1);
     } catch (error) {
       console.error("Erro ao buscar horários:", error);
       setListError("Não foi possível carregar os registros. Verifique sua conexão e tente novamente.");
+    } finally {
+      setListLoading(false);
     }
-    setListLoading(false);
   };
-
   useEffect(() => {
     if (user) {
       fetchHorarios();
@@ -206,16 +239,58 @@ export default function HorariosPage() {
     }
   }, [status, router]);
 
-  const openModal = (workHour?: WorkHour) => {
+  const selectedDateKey = date ? dayjs(date).format("YYYY-MM-DD") : "";
+
+  useEffect(() => {
+    if (!showModal || !selectedDateKey) return;
+
+    const controller = new AbortController();
+    setDayIntervals({ dateKey: selectedDateKey, records: [], loading: true });
+
+    fetch(`/api/horarios?date=${selectedDateKey}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Não foi possível conferir os períodos deste dia.");
+        return response.json() as Promise<WorkHour[]>;
+      })
+      .then((records) => {
+        setDayIntervals({ dateKey: selectedDateKey, records, loading: false });
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === "AbortError") return;
+        setDayIntervals({
+          dateKey: selectedDateKey,
+          records: [],
+          loading: false,
+          error: "Não foi possível conferir os períodos deste dia.",
+        });
+      });
+
+    return () => controller.abort();
+  }, [showModal, selectedDateKey]);
+
+  const selectedDayIntervals =
+    dayIntervals?.dateKey === selectedDateKey ? dayIntervals.records : [];
+  const intervalCheckLoading =
+    showModal && !!selectedDateKey && (dayIntervals?.dateKey !== selectedDateKey || dayIntervals.loading);
+  const intervalCheckError =
+    dayIntervals?.dateKey === selectedDateKey ? dayIntervals.error : undefined;
+  const intervalValidationMessage =
+    date && start && end ? validateWorkInterval(selectedDateKey, start, end) : null;
+  const overlappingIntervals =
+    start && end && !intervalValidationMessage
+      ? findOverlappingWorkIntervals(selectedDayIntervals, start, end, editingHorario?.id)
+      : [];
+
+  const openModal = (workHour?: WorkHour, initialDate?: Date) => {
     if (workHour) {
       setEditingHorario(workHour);
       setDate(dayjs(workHour.date).toDate());
-      setStart(workHour.start_time);
-      setEnd(workHour.end_time);
+      setStart(workHour.start_time.slice(0, 5));
+      setEnd(workHour.end_time.slice(0, 5));
       setDescription(workHour.description || "");
     } else {
       setEditingHorario(null);
-      setDate(new Date());
+      setDate(initialDate ?? new Date());
       setStart("");
       setEnd("");
       setDescription("");
@@ -243,76 +318,148 @@ export default function HorariosPage() {
       return;
     }
 
+    const dateValue = dayjs(date).format("YYYY-MM-DD");
+    const validationError = validateWorkInterval(dateValue, start, end);
+    if (validationError) {
+      setFormError(validationError);
+      return;
+    }
+    if (dayIntervals?.dateKey !== dateValue || dayIntervals.loading) {
+      setFormError("Aguarde a conferência dos outros períodos deste dia.");
+      return;
+    }
+    if (dayIntervals.error) {
+      setFormError(dayIntervals.error);
+      return;
+    }
+    const overlaps = findOverlappingWorkIntervals(
+      dayIntervals.records,
+      start,
+      end,
+      editingHorario?.id,
+    );
+    if (overlaps.length > 0) {
+      setFormError("Este período se sobrepõe a outro horário registrado neste dia.");
+      return;
+    }
+
     setSaving(true);
     try {
       const url = editingHorario ? `/api/horarios/${editingHorario.id}` : "/api/horarios";
       const method = editingHorario ? "PUT" : "POST";
-
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date: date ? dayjs(date).format("YYYY-MM-DD") : null,
+          date: dateValue,
           start_time: start,
           end_time: end,
           description: description || null,
         }),
       });
 
-      if (response.ok) {
-        setSuccess(editingHorario ? "Horário atualizado!" : "Horário salvo!");
-        setTimeout(() => {
-          closeModal();
-          fetchHorarios(searchDate, searchDescription);
-        }, 1000);
-      } else {
+      if (!response.ok) {
         const error = await response.json();
-        setFormError(error.error || "Erro ao salvar horário");
+        setFormError(error.error || "Erro ao salvar horário.");
+        return;
       }
-    } catch (_error) {
-      setFormError("Erro ao salvar horário");
+
+      closeModal();
+      setSuccess(editingHorario ? "Horário atualizado." : "Horário salvo.");
+      await fetchHorarios(activeSearchDate, activeSearchDescription, activePeriodPreset);
+    } catch {
+      setFormError("Não foi possível salvar o horário. Tente novamente.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = (id: string) => {
-    setItemToDelete(id);
+  const handleDelete = (workHour: WorkHour) => {
+    setItemToDelete(workHour);
+    setDeleteError("");
     setConfirmDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!itemToDelete) return;
+    if (!itemToDelete || deleting) return false;
 
+    setDeleting(true);
+    setDeleteError("");
     try {
-      const response = await fetch(`/api/horarios/${itemToDelete}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setSuccess("Horário excluído com sucesso!");
-        fetchHorarios(searchDate, searchDescription);
-        setTimeout(() => setSuccess(""), 3000);
-      } else {
-        setFormError("Erro ao excluir horário");
+      const response = await fetch(`/api/horarios/${itemToDelete.id}`, { method: "DELETE" });
+      if (!response.ok) {
+        const error = await response.json();
+        setDeleteError(error.error || "Não foi possível excluir este horário.");
+        return false;
       }
-    } catch (_error) {
-      setFormError("Erro ao excluir horário");
-    } finally {
+
+      setSuccess("Horário excluído.");
+      await fetchHorarios(activeSearchDate, activeSearchDescription, activePeriodPreset);
       setItemToDelete(null);
+      return true;
+    } catch {
+      setDeleteError("Não foi possível excluir este horário. Verifique sua conexão e tente novamente.");
+      return false;
+    } finally {
+      setDeleting(false);
     }
   };
 
   const handleSearch = () => {
-    fetchHorarios(searchDate, searchDescription);
+    const preset = searchDate ? "custom" : periodPreset;
+    setPeriodPreset(preset);
+    fetchHorarios(searchDate, searchDescription, preset, true);
+  };
+
+  const applyPeriodPreset = (preset: Exclude<PeriodPreset, "custom">) => {
+    setSearchDate(undefined);
+    setPeriodPreset(preset);
+    fetchHorarios(undefined, searchDescription, preset, true);
   };
 
   const clearSearch = () => {
     setSearchDate(undefined);
     setSearchDescription("");
-    fetchHorarios();
+    setPeriodPreset("all");
+    fetchHorarios(undefined, "", "all", true);
   };
 
+  const horariosFiltrados = useMemo(() => {
+    const query = activeSearchDescription.trim().toLocaleLowerCase("pt-BR");
+    if (!query) return horarios;
+    return horarios.filter((horario) =>
+      (horario.description || "").toLocaleLowerCase("pt-BR").includes(query),
+    );
+  }, [horarios, activeSearchDescription]);
+
+  const horariosAgrupados = groupByDate(horariosFiltrados);
+  const diasOrdenados = Object.entries(horariosAgrupados).sort(([a], [b]) => b.localeCompare(a));
+  const totaisPorData = useMemo(() => {
+    const totals: Record<string, { minutes: number; count: number }> = {};
+    horarios.forEach((horario) => {
+      const key = horario.date.slice(0, 10);
+      const current = totals[key] ?? { minutes: 0, count: 0 };
+      current.minutes += workedMinutes(horario.start_time, horario.end_time);
+      current.count += 1;
+      totals[key] = current;
+    });
+    return totals;
+  }, [horarios]);
+
+  const totalDias = diasOrdenados.length;
+  const totalPaginas = Math.ceil(totalDias / DIAS_POR_PAGINA);
+  const startIndex = (currentPage - 1) * DIAS_POR_PAGINA;
+  const endIndex = startIndex + DIAS_POR_PAGINA;
+  const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
+  const totalEncontradoMinutos = horariosFiltrados.reduce(
+    (total, horario) => total + workedMinutes(horario.start_time, horario.end_time),
+    0,
+  );
+
+  useEffect(() => {
+    const lastPage = Math.max(1, totalPaginas);
+    setCurrentPage((page) => Math.min(page, lastPage));
+  }, [totalPaginas]);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -326,16 +473,6 @@ export default function HorariosPage() {
       </div>
     );
   }
-
-  const horariosAgrupados = groupByDate(horarios);
-  const diasOrdenados = Object.entries(horariosAgrupados).sort(([a], [b]) => b.localeCompare(a));
-
-  // Paginação
-  const totalDias = diasOrdenados.length;
-  const totalPaginas = Math.ceil(totalDias / DIAS_POR_PAGINA);
-  const startIndex = (currentPage - 1) * DIAS_POR_PAGINA;
-  const endIndex = startIndex + DIAS_POR_PAGINA;
-  const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
 
   return (
     <div className="max-w-layout mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
@@ -377,22 +514,47 @@ export default function HorariosPage() {
               Filtros
             </CardTitle>
             <CardDescription>
-              Filtre seus registros por data ou descrição
+              Combine um período rápido, uma data específica e uma busca por descrição.
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 space-y-2">
+              <p className="text-sm font-medium">Período rápido</p>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por período">
+                {([
+                  ["today", "Hoje"],
+                  ["week", "Esta semana"],
+                  ["month", "Este mês"],
+                  ["all", "Todo período"],
+                ] as const).map(([preset, label]) => (
+                  <Button
+                    key={preset}
+                    type="button"
+                    size="sm"
+                    variant={periodPreset === preset ? "default" : "outline"}
+                    aria-pressed={periodPreset === preset}
+                    onClick={() => applyPeriodPreset(preset)}
+                    disabled={listLoading}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
             <form onSubmit={(event) => { event.preventDefault(); handleSearch(); }} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DatePicker
                   date={searchDate}
-                  onDateChange={setSearchDate}
-                  label="Buscar por data"
+                  onDateChange={(selectedDate) => {
+                    setSearchDate(selectedDate);
+                    setPeriodPreset(selectedDate ? "custom" : "all");
+                  }}
+                  label="Data específica"
                   placeholder="Selecionar data"
                   className="w-full"
                 />
-                <div className="space-y-2">
-                  <Label htmlFor="search-description" className="flex items-center gap-2">
-                    <IconSearch className="w-4 h-4" />
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="search-description">
                     Buscar por descrição
                   </Label>
                   <Input
@@ -417,6 +579,14 @@ export default function HorariosPage() {
           </CardContent>
         </Card>
       </div>
+
+      {!listLoading && !listError && (
+        <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
+          {horariosFiltrados.length} período{horariosFiltrados.length !== 1 ? "s" : ""} encontrado{horariosFiltrados.length !== 1 ? "s" : ""} em {totalDias} dia{totalDias !== 1 ? "s" : ""}
+          {" · "}Total dos resultados: <span className="font-semibold tabular-nums text-foreground">{formatHours(totalEncontradoMinutos / 60)}</span>
+          {activeSearchDescription && <span className="block mt-1">O total completo do dia continua considerando todos os períodos registrados.</span>}
+        </p>
+      )}
 
       {/* Lista de horários com paginação */}
       <div className="space-y-6">
@@ -443,8 +613,8 @@ export default function HorariosPage() {
             <CardContent className="text-center py-12">
               <IconClock className="size-8 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
               <h2 className="font-medium">Nenhum horário encontrado</h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{searchDate || searchDescription ? "Experimente outra data ou descrição, ou limpe os filtros." : "Registre sua entrada e saída para começar a acompanhar sua jornada."}</p>
-              <Button variant="outline" className="mt-5" onClick={searchDate || searchDescription ? clearSearch : () => openModal()}>{searchDate || searchDescription ? "Limpar filtros" : "Criar primeiro registro"}</Button>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{activeSearchDate || activeSearchDescription || activePeriodPreset !== "all" ? "Experimente outro período, outra data ou descrição, ou limpe os filtros." : "Registre sua entrada e saída para começar a acompanhar sua jornada."}</p>
+              <Button variant="outline" className="mt-5" onClick={activeSearchDate || activeSearchDescription || activePeriodPreset !== "all" ? clearSearch : () => openModal()}>{activeSearchDate || activeSearchDescription || activePeriodPreset !== "all" ? "Limpar filtros" : "Criar primeiro registro"}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -456,14 +626,14 @@ export default function HorariosPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <IconCalendar className="w-5 h-5" />
-                        {dayjs(data).format("DD/MM/YYYY")} · {dayjs(data).locale("pt-br").format("dddd")}
+                        {dayjs(`${data}T12:00`).format("DD/MM/YYYY")} · {dayjs(`${data}T12:00`).locale("pt-br").format("dddd")}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-1 mt-2">
                         <IconClock className="size-4" aria-hidden="true" />
-                        Total do dia: <span className="font-semibold tabular-nums">{formatHours(horariosData.reduce((total, registro) => total + workedMinutes(registro.start_time, registro.end_time), 0) / 60)}</span>
+                        {activeSearchDescription ? "Total completo do dia:" : "Total do dia:"} <span className="font-semibold tabular-nums">{formatHours((totaisPorData[data]?.minutes ?? 0) / 60)}</span>
                       </CardDescription>
                       {(() => {
-                        const totalMinutes = horariosData.reduce((total, registro) => total + workedMinutes(registro.start_time, registro.end_time), 0);
+                        const totalMinutes = totaisPorData[data]?.minutes ?? 0;
                         const minutesMissing = Math.max(dailyTargetMinutes - totalMinutes, 0);
                         const minutesOver = Math.max(totalMinutes - dailyTargetMinutes, 0);
 
@@ -485,9 +655,23 @@ export default function HorariosPage() {
                         );
                       })()}
                     </div>
-                    <Badge variant="secondary">
-                      {horariosData.length} registro{horariosData.length !== 1 ? 's' : ''}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary">
+                        {activeSearchDescription
+                          ? `${horariosData.length} de ${totaisPorData[data]?.count ?? 0} períodos`
+                          : `${horariosData.length} período${horariosData.length !== 1 ? "s" : ""}`}
+                      </Badge>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openModal(undefined, dayjs(data).startOf("day").toDate())}
+                        aria-label={`Adicionar período em ${dayjs(`${data}T12:00`).format("DD/MM/YYYY")}`}
+                      >
+                        <IconPlus className="mr-1 size-4" aria-hidden="true" />
+                        Adicionar período
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -504,7 +688,15 @@ export default function HorariosPage() {
                     <TableBody>
                       {horariosData.map((horario) => (
                         <TableRow key={horario.id}>
-                          <TableCell className="font-medium tabular-nums">{horario.start_time.slice(0, 5)}</TableCell>
+                          <TableCell className="font-medium tabular-nums">
+                            {horario.start_time.slice(0, 5)}
+                            {horario.description ? (
+                              <details className="mt-1 max-w-48 text-left text-xs font-normal text-muted-foreground md:hidden">
+                                <summary className="cursor-pointer py-1 underline underline-offset-2">Ver descrição</summary>
+                                <p className="break-words pt-1">{horario.description}</p>
+                              </details>
+                            ) : <span className="mt-1 block text-xs font-normal text-muted-foreground md:hidden">Sem descrição</span>}
+                          </TableCell>
                           <TableCell className="font-medium tabular-nums">{horario.end_time.slice(0, 5)}</TableCell>
                           <TableCell className="font-semibold tabular-nums">
                             {calculateTotalHours(horario.start_time, horario.end_time)}
@@ -516,7 +708,8 @@ export default function HorariosPage() {
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
+                                className="size-11 md:size-9"
                                 onClick={() => openModal(horario)}
                                 aria-label={`Editar registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
                               >
@@ -524,10 +717,10 @@ export default function HorariosPage() {
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(horario.id)}
+                                size="icon"
+                                className="size-11 text-destructive hover:text-destructive md:size-9"
+                                onClick={() => handleDelete(horario)}
                                 aria-label={`Excluir registro de ${horario.start_time.slice(0, 5)} a ${horario.end_time.slice(0, 5)}`}
-                                className="text-destructive hover:text-destructive"
                               >
                                 <IconTrash className="w-4 h-4" />
                               </Button>
@@ -582,7 +775,7 @@ export default function HorariosPage() {
             {/* Informações da paginação */}
             {totalDias > 0 && (
               <div className="text-center text-muted-foreground mt-4">
-                Mostrando {startIndex + 1}-{Math.min(endIndex, totalDias)} de {totalDias} dias
+                Mostrando {startIndex + 1}-{Math.min(endIndex, totalDias)} de {totalDias} dia{totalDias !== 1 ? "s" : ""}
               </div>
             )}
           </>
@@ -615,11 +808,11 @@ export default function HorariosPage() {
               <p className="text-sm text-muted-foreground">Alterar a jornada também recalcula o saldo de horas extras do seu histórico.</p>
             </div>
             {targetError && <Alert variant="destructive"><AlertDescription>{targetError}</AlertDescription></Alert>}
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+            <div className="flex flex-col-reverse gap-2">
               <Button type="button" variant="ghost" onClick={() => { setTargetInput("08:00"); setTargetError(""); }} disabled={targetSaving || targetInput === "08:00"}>
                 Restaurar padrão · 8h
               </Button>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setTargetDialogOpen(false)} disabled={targetSaving}>Cancelar</Button>
                 <Button type="submit" disabled={targetSaving || targetLoading}>
                   {targetSaving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
@@ -665,6 +858,23 @@ export default function HorariosPage() {
               datePlaceholder="Selecionar data"
             />
             <TimePicker id="end" label="Saída" value={end} onTimeChange={setEnd} required />
+            {date && start && end && intervalValidationMessage && (
+              <Alert variant="destructive">
+                <AlertDescription>{intervalValidationMessage}</AlertDescription>
+              </Alert>
+            )}
+            {date && start && end && !intervalValidationMessage && (
+              <div className="space-y-2 rounded-lg bg-muted/50 p-3 text-sm">
+                <p className="font-medium tabular-nums">Este período soma {formatHours(workedMinutes(start, end) / 60)}.</p>
+                {intervalCheckLoading && <p className="text-muted-foreground">Conferindo os outros períodos deste dia…</p>}
+                {intervalCheckError && <p role="alert" className="text-destructive">{intervalCheckError}</p>}
+                {overlappingIntervals.map((interval) => (
+                  <p key={interval.id} role="alert" className="text-destructive">
+                    Conflito com {interval.start_time.slice(0, 5)}–{interval.end_time.slice(0, 5)}. Ajuste os horários para não contar o mesmo tempo duas vezes.
+                  </p>
+                ))}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="description">Descrição (opcional)</Label>
               <Textarea
@@ -686,7 +896,11 @@ export default function HorariosPage() {
               </Alert>
             )}
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1" disabled={saving || !!success}>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={saving || !!success || !date || !start || !end || !!intervalValidationMessage || intervalCheckLoading || !!intervalCheckError || overlappingIntervals.length > 0}
+              >
                 {saving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {saving ? "Salvando..." : editingHorario ? "Atualizar" : "Salvar"}
               </Button>
@@ -701,13 +915,21 @@ export default function HorariosPage() {
       {/* Diálogo de Confirmação Responsivo */}
       <ConfirmationDialog
         open={confirmDialogOpen}
-        onOpenChange={setConfirmDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && deleting) return;
+          setConfirmDialogOpen(open);
+          if (open) setDeleteError("");
+        }}
         title="Excluir Horário"
-        description="Tem certeza que deseja excluir este horário? Esta ação não pode ser desfeita."
+        description={itemToDelete
+          ? `Excluir o período de ${itemToDelete.start_time.slice(0, 5)} a ${itemToDelete.end_time.slice(0, 5)} em ${dayjs(`${itemToDelete.date}T12:00`).format("DD/MM/YYYY")}? O total do dia e o saldo de extras serão recalculados.`
+          : "Esta ação não pode ser desfeita."}
         confirmText="Excluir"
         cancelText="Cancelar"
         variant="destructive"
         onConfirm={confirmDelete}
+        isConfirming={deleting}
+        error={deleteError}
       />
     </div>
   );

@@ -36,3 +36,18 @@ export function formatDailyTarget(minutes: number) {
 
   return remainder === 0 ? `${hours}h` : `${hours}h ${String(remainder).padStart(2, "0")}min`;
 }
+
+export function parseHoursInput(value: string): number | null {
+  const input = value.trim();
+  const clockMatch = /^(\d{1,3}):([0-5]\d)$/.exec(input);
+
+  if (clockMatch) {
+    return Number(clockMatch[1]) + Number(clockMatch[2]) / 60;
+  }
+
+  const decimalMatch = /^(\d+)(?:[.,](\d+))?$/.exec(input);
+  if (!decimalMatch) return null;
+
+  const hours = Number(`${decimalMatch[1]}${decimalMatch[2] ? `.${decimalMatch[2]}` : ""}`);
+  return Number.isFinite(hours) ? hours : null;
+}

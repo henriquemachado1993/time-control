@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
@@ -14,8 +14,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { IconCashBanknote, IconStopwatch, IconTrendingUp, IconPlus, IconEdit, IconTrash, IconLoader2 } from "@tabler/icons-react";
-import { formatHours } from "@/lib/hours";
+import { IconCashBanknote, IconStopwatch, IconTrendingUp, IconPlus, IconEdit, IconTrash, IconLoader2, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { formatHours, parseHoursInput } from "@/lib/hours";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type User = any;
@@ -42,6 +42,15 @@ type ExtraHoursUsage = {
   };
 };
 
+type OvertimeMovement =
+  | { key: string; date: string; kind: "earned"; hours: number }
+  | { key: string; date: string; kind: "used"; hours: number; usage: ExtraHoursUsage };
+
+function formatHoursAsClock(hours: number) {
+  const minutes = Math.round(hours * 60);
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
 export default function HorasExtrasPage() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
@@ -56,6 +65,12 @@ export default function HorasExtrasPage() {
   const [usoData, setUsoData] = useState<Date | undefined>(new Date());
   const [usoHoras, setUsoHoras] = useState("");
   const [usoDescricao, setUsoDescricao] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState<{ from?: string; to?: string; description: string }>({ description: "" });
+  const [filterError, setFilterError] = useState("");
+  const [historyPage, setHistoryPage] = useState(1);
 
   // Estados da interface
   const [success, setSuccess] = useState("");
@@ -66,27 +81,9 @@ export default function HorasExtrasPage() {
 
   // Estados para exclusão de uso de horas extras
   const [confirmDeleteUsoOpen, setConfirmDeleteUsoOpen] = useState(false);
-  const [usoToDelete, setUsoToDelete] = useState<string | null>(null);
-
-  // Função para converter horas:minutos para decimal
-  const parseHoursInput = (input: string) => {
-    // Se já é decimal, retorna como está
-    if (input.includes('.')) {
-      return parseFloat(input);
-    }
-
-    // Se tem formato h:mm ou h:m, converte
-    if (input.includes(':')) {
-      const [hours, minutes] = input.split(':').map(Number);
-      if (!isNaN(hours) && !isNaN(minutes)) {
-        return hours + (minutes / 60);
-      }
-    }
-
-    // Caso contrário, trata como número decimal
-    const num = parseFloat(input);
-    return isNaN(num) ? 0 : num;
-  };
+  const [usoToDelete, setUsoToDelete] = useState<ExtraHoursUsage | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     if (status === "loading") return;
@@ -135,12 +132,56 @@ export default function HorasExtrasPage() {
     }
   }, [user]);
 
+  const movements = useMemo(() => {
+    const earned: OvertimeMovement[] = Object.entries(horasExtrasDisponiveis?.breakdown_by_date ?? {})
+      .filter(([, hours]) => hours > 0)
+      .map(([date, hours]) => ({ key: `earned-${date}`, date, kind: "earned", hours }));
+    const used: OvertimeMovement[] = usosHorasExtras.map((usage) => ({
+      key: `used-${usage.id}`,
+      date: usage.date,
+      kind: "used",
+      hours: usage.hours_used,
+      usage,
+    }));
+    const query = appliedFilters.description.trim().toLocaleLowerCase("pt-BR");
+
+    return [...earned, ...used]
+      .filter((movement) => {
+        if (appliedFilters.from && movement.date < appliedFilters.from) return false;
+        if (appliedFilters.to && movement.date > appliedFilters.to) return false;
+        if (!query) return true;
+        return movement.kind === "used" && (movement.usage.description || "").toLocaleLowerCase("pt-BR").includes(query);
+      })
+      .sort((a, b) => {
+        const dateOrder = b.date.localeCompare(a.date);
+        if (dateOrder !== 0) return dateOrder;
+        if (a.kind !== b.kind) return a.kind === "earned" ? -1 : 1;
+        if (a.kind === "used" && b.kind === "used") {
+          return b.usage.created_at.localeCompare(a.usage.created_at);
+        }
+        return 0;
+      });
+  }, [horasExtrasDisponiveis, usosHorasExtras, appliedFilters]);
+
+  const MOVEMENTS_PER_PAGE = 10;
+  const totalHistoryPages = Math.ceil(movements.length / MOVEMENTS_PER_PAGE);
+  const pagedMovements = movements.slice((historyPage - 1) * MOVEMENTS_PER_PAGE, historyPage * MOVEMENTS_PER_PAGE);
+  const parsedUsageHours = usoHoras.trim() ? parseHoursInput(usoHoras) : null;
+  const maxAllowedUsageHours = (horasExtrasDisponiveis?.available ?? 0) + (editingUso?.hours_used ?? 0);
+  const projectedAvailableHours = parsedUsageHours === null
+    ? null
+    : Math.max(0, (horasExtrasDisponiveis?.available ?? 0) + (editingUso?.hours_used ?? 0) - parsedUsageHours);
+
+  useEffect(() => {
+    setHistoryPage((page) => Math.min(page, Math.max(1, totalHistoryPages)));
+  }, [totalHistoryPages]);
+
   // Funções para modais de horas extras
   const openUsoModal = (uso?: ExtraHoursUsage) => {
     if (uso) {
       setEditingUso(uso);
       setUsoData(dayjs(uso.date).toDate());
-      setUsoHoras(uso.hours_used.toString());
+      setUsoHoras(formatHoursAsClock(uso.hours_used));
       setUsoDescricao(uso.description || "");
     } else {
       setEditingUso(null);
@@ -168,14 +209,15 @@ export default function HorasExtrasPage() {
     setSuccess("");
 
     const horasNum = parseHoursInput(usoHoras);
-    if (!Number.isFinite(horasNum) || horasNum <= 0) {
+    if (horasNum === null || !Number.isFinite(horasNum) || horasNum <= 0) {
       setFormError("Horas utilizadas deve ser um valor positivo.");
       return;
     }
 
-    const maxAvailable = horasExtrasDisponiveis?.available || 0;
+    const currentAvailable = horasExtrasDisponiveis?.available || 0;
+    const maxAvailable = currentAvailable + (editingUso?.hours_used ?? 0);
     if (horasNum > maxAvailable) {
-      setFormError(`Horas insuficientes. Você tem ${formatHours(maxAvailable)} disponíveis.`);
+      setFormError(`Horas insuficientes. Você pode usar até ${formatHours(maxAvailable)} neste registro.`);
       return;
     }
 
@@ -200,12 +242,10 @@ export default function HorasExtrasPage() {
       });
 
       if (response.ok) {
-        setSuccess(editingUso ? "Uso atualizado!" : "Uso registrado!");
-        setTimeout(() => {
-          closeUsoModal();
-          fetchUsosHorasExtras();
-          fetchHorasExtrasDisponiveis(); // Recarregar horas disponíveis
-        }, 1000);
+        closeUsoModal();
+        setSuccess(editingUso ? "Uso atualizado." : "Uso registrado.");
+        if (!editingUso) setHistoryPage(1);
+        await Promise.all([fetchUsosHorasExtras(), fetchHorasExtrasDisponiveis()]);
       } else {
         const error = await response.json();
         setFormError(error.error || "Erro ao salvar uso");
@@ -217,38 +257,58 @@ export default function HorasExtrasPage() {
     }
   };
 
-  // Função para excluir uso de horas extras
-  const handleDeleteUso = (usoId: string) => {
-    setUsoToDelete(usoId);
+  const handleDeleteUso = (usage: ExtraHoursUsage) => {
+    setUsoToDelete(usage);
+    setDeleteError("");
     setConfirmDeleteUsoOpen(true);
   };
 
   const confirmDeleteUso = async () => {
-    if (!usoToDelete) return;
+    if (!usoToDelete || deleting) return false;
 
+    setDeleting(true);
+    setDeleteError("");
     try {
-      const response = await fetch(`/api/horas-extras/uso/${usoToDelete}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setSuccess("Uso de horas extras excluído com sucesso!");
-        fetchUsosHorasExtras();
-        fetchHorasExtrasDisponiveis();
-        setTimeout(() => setSuccess(""), 3000);
-      } else {
+      const response = await fetch(`/api/horas-extras/uso/${usoToDelete.id}`, { method: "DELETE" });
+      if (!response.ok) {
         const error = await response.json();
-        setFormError(error.error || "Erro ao excluir uso");
+        setDeleteError(error.error || "Não foi possível excluir este uso.");
+        return false;
       }
-    } catch (error) {
-      console.error("Erro ao excluir uso de horas extras:", error);
-      setFormError("Erro ao excluir uso de horas extras");
-    } finally {
+
+      setSuccess("Uso excluído. O saldo foi atualizado.");
+      await Promise.all([fetchUsosHorasExtras(), fetchHorasExtrasDisponiveis()]);
       setUsoToDelete(null);
-      setConfirmDeleteUsoOpen(false);
+      return true;
+    } catch {
+      setDeleteError("Não foi possível excluir este uso. Verifique sua conexão e tente novamente.");
+      return false;
+    } finally {
+      setDeleting(false);
     }
   };
 
+  const applyHistoryFilters = () => {
+    const from = dateFrom ? dayjs(dateFrom).format("YYYY-MM-DD") : undefined;
+    const to = dateTo ? dayjs(dateTo).format("YYYY-MM-DD") : undefined;
+    if (from && to && from > to) {
+      setFilterError("A data inicial deve ser anterior à data final.");
+      return;
+    }
+
+    setFilterError("");
+    setAppliedFilters({ from, to, description: descriptionFilter.trim() });
+    setHistoryPage(1);
+  };
+
+  const clearHistoryFilters = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setDescriptionFilter("");
+    setAppliedFilters({ description: "" });
+    setFilterError("");
+    setHistoryPage(1);
+  };
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -326,17 +386,16 @@ export default function HorasExtrasPage() {
           </Card>
         </div>
 
-        {/* Registro de Usos */}
         <Card>
           <CardHeader>
-            <div className="flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2 leading-snug">
-                  <IconStopwatch className="w-5 h-5" />
-                  Registro de Uso de Horas Extras
+                  <IconStopwatch className="size-5" aria-hidden="true" />
+                  Movimentações do banco de horas
                 </CardTitle>
                 <CardDescription>
-                  Registre quando utilizar suas horas extras acumuladas automaticamente
+                  Veja em quais dias as horas extras foram geradas e quando foram utilizadas.
                 </CardDescription>
               </div>
               <Button
@@ -344,75 +403,162 @@ export default function HorasExtrasPage() {
                 className="self-start"
                 disabled={dataLoading || !!dataError || !horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0}
               >
-                <IconPlus className="w-4 h-4 mr-2" />
-                Registrar Uso
+                <IconPlus className="mr-2 size-4" aria-hidden="true" />
+                Registrar uso
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {dataLoading ? <div className="space-y-3" aria-label="Carregando histórico"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : dataError ? null : usosHorasExtras.length === 0 ? (
-              <div className="text-center py-8">
-                <IconStopwatch className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <div className="mb-5 grid grid-cols-1 gap-4 rounded-lg bg-muted/40 p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_2fr_auto] xl:items-end">
+              <DatePicker
+                date={dateFrom}
+                onDateChange={setDateFrom}
+                label="De"
+                placeholder="Data inicial"
+              />
+              <DatePicker
+                date={dateTo}
+                onDateChange={setDateTo}
+                label="Até"
+                placeholder="Data final"
+              />
+              <div className="space-y-2">
+                <Label htmlFor="history-description">Descrição</Label>
+                <Input
+                  id="history-description"
+                  type="search"
+                  placeholder="Buscar nos usos registrados"
+                  value={descriptionFilter}
+                  onChange={(event) => setDescriptionFilter(event.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 xl:justify-end">
+                <Button type="button" onClick={applyHistoryFilters} disabled={dataLoading}>Filtrar</Button>
+                <Button type="button" variant="outline" onClick={clearHistoryFilters} disabled={dataLoading}>Limpar</Button>
+              </div>
+            </div>
+            {filterError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{filterError}</AlertDescription>
+              </Alert>
+            )}
+            {appliedFilters.description && (
+              <p className="mb-4 text-sm text-muted-foreground">
+                A busca por descrição considera os registros de uso. Os totais acima continuam mostrando o saldo completo.
+              </p>
+            )}
+
+            {dataLoading ? (
+              <div className="space-y-3" aria-label="Carregando movimentações">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : dataError ? null : movements.length === 0 ? (
+              <div className="py-8 text-center">
+                <IconStopwatch className="mx-auto mb-4 size-12 text-muted-foreground" aria-hidden="true" />
                 <p className="text-muted-foreground">
-                  {!horasExtrasDisponiveis || horasExtrasDisponiveis.available <= 0
-                    ? "Você ainda não possui horas extras disponíveis"
-                    : "Nenhum uso registrado ainda"
-                  }
+                  {appliedFilters.from || appliedFilters.to || appliedFilters.description
+                    ? "Nenhuma movimentação corresponde a estes filtros."
+                    : "Ainda não há horas extras geradas ou utilizadas."}
                 </p>
-                {horasExtrasDisponiveis && horasExtrasDisponiveis.available > 0 && (
+                {!appliedFilters.from && !appliedFilters.to && !appliedFilters.description && horasExtrasDisponiveis && horasExtrasDisponiveis.available > 0 && (
                   <Button onClick={() => openUsoModal()} className="mt-4">
-                    <IconPlus className="w-4 h-4 mr-2" />
-                    Registrar Primeiro Uso
+                    <IconPlus className="mr-2 size-4" aria-hidden="true" />
+                    Registrar primeiro uso
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
-                {usosHorasExtras.slice(0, 10).map((uso) => (
-                  <div key={uso.id} className="flex flex-wrap items-center justify-between gap-3 border-b py-4 last:border-b-0">
-                    <div className="min-w-0 space-y-1">
-                      <p className="font-medium">
-                        {formatHours(uso.hours_used)} utilizadas em {dayjs(uso.date).format("DD/MM/YYYY")}
-                      </p>
-                      {/* <p className="text-sm text-muted-foreground">
-                        Valor decimal: {uso.hours_used.toFixed(2)}h
-                      </p> */}
-                      {uso.description && (
-                        <p className="text-sm text-muted-foreground break-words">{uso.description}</p>
-                      )}
+              <div className="divide-y">
+                {pagedMovements.map((movement) => {
+                  const usage = movement.kind === "used" ? movement.usage : null;
+                  const movementDate = dayjs(`${movement.date}T12:00`).format("DD/MM/YYYY");
+
+                  return (
+                    <div key={movement.key} className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-1">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="mt-0.5 rounded-full bg-muted p-2">
+                          {movement.kind === "earned"
+                            ? <IconTrendingUp className="size-4" aria-hidden="true" />
+                            : <IconStopwatch className="size-4" aria-hidden="true" />}
+                        </span>
+                        <div className="min-w-0 space-y-1">
+                          <p className="font-medium">
+                            {movement.kind === "earned" ? "Horas geradas" : "Horas utilizadas"} em {movementDate}
+                          </p>
+                          {usage?.description && (
+                            <p className="break-words text-sm text-muted-foreground">{usage.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold tabular-nums">
+                          {movement.kind === "earned" ? "+" : "−"}{formatHours(movement.hours)}
+                        </span>
+                        {usage && (
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-11 md:size-9"
+                              onClick={() => openUsoModal(usage)}
+                              aria-label={`Editar uso de ${formatHours(usage.hours_used)} em ${movementDate}`}
+                            >
+                              <IconEdit className="size-4" aria-hidden="true" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-11 text-destructive hover:text-destructive md:size-9"
+                              onClick={() => handleDeleteUso(usage)}
+                              aria-label={`Excluir uso de ${formatHours(usage.hours_used)} em ${movementDate}`}
+                            >
+                              <IconTrash className="size-4" aria-hidden="true" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openUsoModal(uso)}
-                        aria-label={`Editar uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
-                      >
-                        <IconEdit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteUso(uso.id)}
-                        aria-label={`Excluir uso de ${formatHours(uso.hours_used)} em ${dayjs(uso.date).format("DD/MM/YYYY")}`}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <IconTrash className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {usosHorasExtras.length > 10 && (
-                  <p className="text-center text-muted-foreground">
-                    Mostrando 10 registros mais recentes de {usosHorasExtras.length} total
-                  </p>
+                  );
+                })}
+              </div>
+            )}
+
+            {!dataLoading && !dataError && movements.length > 0 && (
+              <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t pt-4 sm:flex-row">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando {(historyPage - 1) * MOVEMENTS_PER_PAGE + 1}–{Math.min(historyPage * MOVEMENTS_PER_PAGE, movements.length)} de {movements.length} {movements.length === 1 ? "movimentação" : "movimentações"}
+                </p>
+                {totalHistoryPages > 1 && (
+                  <nav aria-label="Paginação das movimentações" className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setHistoryPage((page) => Math.max(1, page - 1))}
+                      disabled={historyPage === 1}
+                    >
+                      <IconChevronLeft className="mr-1 size-4" aria-hidden="true" />
+                      Anterior
+                    </Button>
+                    <span className="text-sm tabular-nums" aria-live="polite">Página {historyPage} de {totalHistoryPages}</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setHistoryPage((page) => Math.min(totalHistoryPages, page + 1))}
+                      disabled={historyPage === totalHistoryPages}
+                    >
+                      Próxima
+                      <IconChevronRight className="ml-1 size-4" aria-hidden="true" />
+                    </Button>
+                  </nav>
                 )}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
-
       {/* Modal Uso de Horas Extras */}
       <Dialog open={showUsoModal} onOpenChange={setShowUsoModal}>
         <DialogContent className="sm:max-w-md">
@@ -439,47 +585,51 @@ export default function HorasExtrasPage() {
           </DialogHeader>
           <form onSubmit={handleSubmitUso} className="space-y-4">
             <div className="space-y-2">
-              <Label>Data do Uso</Label>
               <DatePicker
                 date={usoData}
                 onDateChange={setUsoData}
+                label="Data do uso"
                 placeholder="Selecionar data"
                 className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="usoHoras">Horas Utilizadas</Label>
+              <Label htmlFor="usoHoras">Horas utilizadas</Label>
               <Input
                 id="usoHoras"
                 type="text"
-                placeholder="4.65 ou 4:30"
+                inputMode="text"
+                placeholder="4:30"
                 value={usoHoras}
-                onChange={(e) => setUsoHoras(e.target.value)}
+                onChange={(event) => setUsoHoras(event.target.value)}
                 required
               />
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>Formatos aceitos: 4.65 (decimal) ou 4:30 (horas:minutos)</p>
-                <p>Máximo disponível: {horasExtrasDisponiveis ? formatHours(horasExtrasDisponiveis.available) : "0h 0min"}</p>
-                {usoHoras && parseHoursInput(usoHoras) > 0 && (
-                  <p className="font-medium text-foreground">
-                    Convertido: {formatHours(parseHoursInput(usoHoras))}
-                  </p>
+              <div className="space-y-1 text-xs text-muted-foreground" aria-live="polite">
+                <p>Formato principal: 4:30 (horas:minutos). Decimais aceitos: 4,5 ou 4.5.</p>
+                <p>Máximo neste registro: {formatHours(maxAllowedUsageHours)}</p>
+                {usoHoras && parsedUsageHours === null && (
+                  <p className="text-destructive">Use horas e minutos (4:30) ou um decimal válido (4,5).</p>
                 )}
-                {usoHoras && parseHoursInput(usoHoras) > (horasExtrasDisponiveis?.available || 0) && (
-                  <p className="text-destructive">
-                    Valor excede o disponível.
-                  </p>
+                {parsedUsageHours !== null && parsedUsageHours > 0 && (
+                  <>
+                    <p className="font-medium text-foreground">Convertido: {formatHours(parsedUsageHours)}</p>
+                    <p className="font-medium text-foreground">
+                      Disponível após este uso: {formatHours(projectedAvailableHours ?? 0)}
+                    </p>
+                  </>
+                )}
+                {parsedUsageHours !== null && parsedUsageHours > maxAllowedUsageHours && (
+                  <p className="text-destructive">O valor excede o saldo permitido para este registro.</p>
                 )}
               </div>
-            </div>
-            <div className="space-y-2">
+            </div>            <div className="space-y-2">
               <Label htmlFor="usoDescricao">Descrição (opcional)</Label>
               <Textarea
                 id="usoDescricao"
                 rows={3}
                 value={usoDescricao}
                 onChange={(e) => setUsoDescricao(e.target.value)}
-                placeholder="Ex: Trabalhei no projeto X..."
+                placeholder="Ex: Saída antecipada, compensação de horas..."
               />
             </div>
             {formError && (
@@ -493,7 +643,7 @@ export default function HorasExtrasPage() {
               </Alert>
             )}
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1" disabled={saving || !!success}>
+              <Button type="submit" className="flex-1" disabled={saving || !!success || parsedUsageHours === null || parsedUsageHours <= 0 || parsedUsageHours > maxAllowedUsageHours}>
                 {saving && <IconLoader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {saving ? "Salvando..." : editingUso ? "Atualizar" : "Registrar"}
               </Button>
@@ -508,13 +658,21 @@ export default function HorasExtrasPage() {
       {/* Diálogo de Confirmação para Exclusão de Uso de Horas Extras */}
       <ConfirmationDialog
         open={confirmDeleteUsoOpen}
-        onOpenChange={setConfirmDeleteUsoOpen}
+        onOpenChange={(open) => {
+          if (!open && deleting) return;
+          setConfirmDeleteUsoOpen(open);
+          if (open) setDeleteError("");
+        }}
         title="Excluir Uso de Horas Extras"
-        description="Tem certeza que deseja excluir este registro de uso de horas extras? As horas utilizadas serão devolvidas ao seu saldo disponível."
+        description={usoToDelete
+          ? `Excluir o uso de ${formatHours(usoToDelete.hours_used)} em ${dayjs(`${usoToDelete.date}T12:00`).format("DD/MM/YYYY")}? Essa quantidade voltará ao saldo disponível.`
+          : "As horas utilizadas serão devolvidas ao saldo disponível."}
         confirmText="Excluir"
         cancelText="Cancelar"
         variant="destructive"
         onConfirm={confirmDeleteUso}
+        isConfirming={deleting}
+        error={deleteError}
       />
     </div>
   );

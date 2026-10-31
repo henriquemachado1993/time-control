@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { findOverlappingWorkIntervals, validateWorkInterval } from "@/lib/work-hours";
 
 // PUT - Atualizar horário
 export async function PUT(
@@ -10,7 +11,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -26,8 +27,9 @@ export async function PUT(
     const { date, start_time, end_time, description } = await request.json();
     const { id } = await params;
 
-    if (!date || !start_time || !end_time) {
-      return NextResponse.json({ error: "Data, entrada e saída são obrigatórios" }, { status: 400 });
+    const validationError = validateWorkInterval(date, start_time, end_time);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     // Verificar se o horário pertence ao usuário
@@ -39,8 +41,16 @@ export async function PUT(
       return NextResponse.json({ error: "Horário não encontrado" }, { status: 404 });
     }
 
+    const existingIntervals = await prisma.work_hours.findMany({
+      where: { user_id: user.id, date },
+    });
+    const overlaps = findOverlappingWorkIntervals(existingIntervals, start_time, end_time, id);
+    if (overlaps.length > 0) {
+      return NextResponse.json({ error: "Este período se sobrepõe a outro horário registrado neste dia." }, { status: 409 });
+    }
+
     const horario = await prisma.work_hours.update({
-      where: { id },
+      where: { id, user_id: user.id },
       data: {
         date,
         start_time,
@@ -63,7 +73,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -88,7 +98,7 @@ export async function DELETE(
     }
 
     await prisma.work_hours.delete({
-      where: { id },
+      where: { id, user_id: user.id },
     });
 
     return NextResponse.json({ message: "Horário excluído com sucesso" });
@@ -96,4 +106,4 @@ export async function DELETE(
     console.error("Erro ao excluir horário:", error);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-} 
+}

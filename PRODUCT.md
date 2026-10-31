@@ -26,9 +26,9 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 
 - Aplicação web com interface e textos em português brasileiro.
 - A pessoa cria uma conta individual e acessa seus dados mediante autenticação.
-- Um registro de trabalho contém data, entrada, saída e descrição opcional. É possível registrar mais de um período no mesmo dia.
-- As horas podem ser pesquisadas por data ou descrição. O histórico agrupa os períodos por dia e apresenta até cinco dias por página.
-- O banco de horas calcula horas extras a partir do total trabalhado por dia e permite anotar seu uso. O formulário de uso aceita horas decimais ou o formato horas:minutos.
+- Um registro de trabalho contém data, entrada, saída e descrição opcional. É possível registrar mais de um período no mesmo dia; os períodos precisam terminar depois da entrada e não podem se sobrepor.
+- As horas podem ser filtradas por data, descrição ou períodos rápidos de hoje, semana e mês. O histórico agrupa os períodos por dia, apresenta até cinco dias por página e preserva a página ao editar ou excluir.
+- O banco de horas calcula horas extras a partir do total trabalhado por dia e permite anotar seu uso. O formulário de uso aceita horas e minutos ou horas decimais com ponto ou vírgula. O extrato mostra geração e uso, com filtros por período e descrição e paginação.
 - A pessoa pode editar e excluir seus registros. Excluir um uso de horas extras devolve a quantidade ao saldo disponível.
 - O painel mostra totais calculados a partir do histórico e um resumo de horas extras geradas, utilizadas e disponíveis.
 - O painel oferece um calendário mensal com os períodos de cada dia, um gráfico diário de horas trabalhadas comparado à jornada configurada e uma comparação mensal de horas extras geradas e utilizadas nos seis meses até o mês selecionado. Dias sem registro são apresentados sem inferir ausência ou folga; os gráficos também disponibilizam os valores em tabela.

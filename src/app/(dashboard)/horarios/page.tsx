@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { DateTimePicker, DatePicker } from "@/components/ui/date-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Progress } from "@/components/ui/progress";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -848,16 +848,16 @@ export default function HorariosPage() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <DateTimePicker
+            <DatePicker
               date={date}
-              time={start}
               onDateChange={setDate}
-              onTimeChange={setStart}
-              dateLabel="Data"
-              timeLabel="Entrada"
-              datePlaceholder="Selecionar data"
+              label="Data"
+              placeholder="Selecionar data"
             />
-            <TimePicker id="end" label="Saída" value={end} onTimeChange={setEnd} required />
+            <div className="grid grid-cols-2 gap-4">
+              <TimePicker label="Entrada" value={start} onTimeChange={setStart} required />
+              <TimePicker id="end" label="Saída" value={end} onTimeChange={setEnd} required />
+            </div>
             {date && start && end && intervalValidationMessage && (
               <Alert variant="destructive">
                 <AlertDescription>{intervalValidationMessage}</AlertDescription>
@@ -934,4 +934,3 @@ export default function HorariosPage() {
     </div>
   );
 }
-

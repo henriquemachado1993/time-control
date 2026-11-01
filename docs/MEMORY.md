@@ -6,6 +6,8 @@ Durable implementation details for future agents. Product intent and unresolved 
 
 NextAuth authenticates each account. API handlers find the account from the server-side session and use its database ID as `user_id` for private work-hour and overtime queries. Preserve this boundary on every collection and ID-based handler. A request parameter alone does not establish record ownership.
 
+Private pages compose their screens under the shared authenticated layout. Server entry checks and client session changes are centralized; see [architecture.md](architecture.md#acesso-autenticado). Keep handler authorization independent from this visual access control.
+
 ## Stored time values
 
 `work_hours.date` is stored as a `YYYY-MM-DD` string; `start_time` and any populated `end_time` are strings in 24-hour `HH:mm` format. `end_time` is nullable for the one open clock-punch period per user. Do not include open periods in worked-time or overtime calculations; users can complete their exit by editing the record. Preserve local calendar dates when parsing, formatting, or grouping these values. A work day may contain several separate records.

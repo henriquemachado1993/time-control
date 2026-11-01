@@ -6,6 +6,16 @@ Os arquivos específicos de uma funcionalidade ficam junto da sua rota. Os módu
 
 As pastas locais usam os nomes `components`, `hooks` e `lib`, sem prefixo `_`. Elas não contêm `page.tsx` nem `route.ts` e, portanto, não criam rotas acessíveis.
 
+## Acesso autenticado
+
+O layout raiz lê a sessão no servidor e a fornece ao único `SessionProvider`, compartilhado entre as telas públicas e privadas. Essa sessão inicial permite montar a interface autenticada sem uma consulta inicial de sessão no navegador; sua leitura no layout raiz torna a renderização dependente da requisição.
+
+O layout de `src/app/(dashboard)` verifica a sessão no servidor e redireciona para `/login` quando não há uma conta com e-mail. Ele envolve a navegação e o conteúdo privado em `components/session-guard.tsx`, que concentra a espera e o redirecionamento quando o estado da sessão muda no cliente. Enquanto o estado não é autenticado, o guard monta somente `session-loading.tsx`.
+
+As três páginas privadas apenas compõem suas funcionalidades. A página de horários mantém um `Suspense` para a leitura dos parâmetros de busca, reutilizando o carregamento compartilhado.
+
+Layouts são reutilizados durante a navegação; a proteção visual não substitui a autorização dos handlers. Cada leitura ou alteração privada continua verificando a sessão no servidor e limitando os registros à conta autenticada.
+
 ## Registros de horas
 
 ```text
@@ -27,7 +37,7 @@ src/app/(dashboard)/horarios/
 
 | Módulo | Responsabilidade |
 | --- | --- |
-| `page.tsx` | Aguardar a sessão, redirecionar acessos sem autenticação e montar a funcionalidade. |
+| `page.tsx` | Montar a funcionalidade e o `Suspense` dos parâmetros de busca, sob o layout autenticado. |
 | `work-hours-history.tsx` | Compor os fluxos, abrir edição e exclusão e atualizar o histórico e o ponto após alterações. |
 | `use-work-hours-history.ts` | Consultar registros, manter filtros aplicados, agrupar dias, calcular totais e preservar a paginação. Consultas substituídas são canceladas. |
 | `work-hours-filters.tsx` | Manter os filtros em edição e comunicar sua aplicação. |
@@ -55,7 +65,7 @@ Um dia com apenas um período aberto aparece no histórico, nos registros recent
 
 ## Painel e calendário
 
-Os arquivos específicos do painel ficam em `src/app/(dashboard)/dashboard`, nas pastas `components`, `hooks` e `lib`, sem prefixo `_`. A página aguarda a sessão e monta a tela; o antigo `src/components/dashboard-insights.tsx`, usado somente no painel, foi dividido e movido para essa funcionalidade.
+Os arquivos específicos do painel ficam em `src/app/(dashboard)/dashboard`, nas pastas `components`, `hooks` e `lib`, sem prefixo `_`. A página monta a tela sob o layout autenticado; o antigo `src/components/dashboard-insights.tsx`, usado somente no painel, foi dividido e movido para essa funcionalidade.
 
 | Módulo | Responsabilidade |
 | --- | --- |
@@ -85,7 +95,7 @@ Assim como em horários, os arquivos exclusivos da tela ficam junto da rota `src
 
 | Módulo | Responsabilidade |
 | --- | --- |
-| `page.tsx` | Aguardar a sessão, redirecionar acessos sem autenticação e montar a tela. |
+| `page.tsx` | Montar a tela sob o layout autenticado. |
 | `overtime-screen.tsx` | Compor resumo, extrato e diálogos e atualizar os dados após alterações. |
 | `use-overtime.ts` | Consultar saldo e usos, publicar os dois resultados juntos e cancelar consultas substituídas ou após desmontagem. |
 | `overtime-summary.tsx` | Apresentar saldo disponível, horas geradas e utilizadas. |

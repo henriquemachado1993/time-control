@@ -7,7 +7,7 @@ import ts from "typescript";
 export function loadSource(file, dependencies = {}) {
   const filename = path.resolve(file);
   const source = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
     fileName: filename,
   }).outputText;
   const localRequire = createRequire(filename);

@@ -1,4 +1,4 @@
-const fs=require('fs');
+import fs from 'node:fs';
 const [src,out]=process.argv.slice(2);
 const css=fs.readFileSync(src,'utf8');
 const blocks={light:css.match(/:root\s*{([\s\S]*?)}/)[1],dark:css.match(/\[data-theme="dark"\]\s*{([\s\S]*?)}/)[1]};
@@ -13,7 +13,7 @@ const type=(n,v)=>{
   if(/^[\d.]+$/.test(v))return'number';
   return'string';
 };
-const res={$description:'Adminsax design tokens (W3C Design Tokens). Fonte: tokens.css'};
+const res={$description:'Admin design tokens (W3C Design Tokens). Fonte: tokens.css'};
 for(const [theme,body] of Object.entries(blocks)){
   const t={};
   for(const m of body.matchAll(/--([\w-]+):\s*([^;]+);/g)){

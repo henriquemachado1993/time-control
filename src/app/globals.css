@@ -1,4 +1,4 @@
-@import "../../docs/design-system-tokens/tokens/tokens.css";
+@import "../styles/tokens/tokens.css";
 @import "timepicker-ui/main.css";
 @import "tailwindcss";
 @import "tw-animate-css";

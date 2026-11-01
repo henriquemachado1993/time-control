@@ -47,7 +47,7 @@ O mecanismo atual combina registros de entrada e saída, cálculo automático de
 
 ## Evidence on Hand
 
-- O [README.md](README.md) documenta o cadastro, o histórico de horários, os filtros, o banco de horas e a jornada padrão de oito horas.
+- O [README.md](../README.md) documenta o cadastro, o histórico de horários, os filtros, o banco de horas e a jornada padrão de oito horas.
 - As telas implementadas em `src/app/(dashboard)/dashboard/page.tsx`, `src/app/(dashboard)/horarios/page.tsx` e `src/app/(dashboard)/horas-extras/page.tsx` demonstram os fluxos descritos acima.
 - `prisma/schema.prisma` confirma a separação de registros por identificador de usuário e os campos disponíveis para registros de trabalho e usos de horas extras.
 - Não foram identificados depoimentos, dados de clientes, avaliações externas ou medidas independentes de produtividade. Não inferir nem criar esses elementos.

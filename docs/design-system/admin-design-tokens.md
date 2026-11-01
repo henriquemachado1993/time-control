@@ -1,16 +1,16 @@
-# Adminsax — Design System
+# Admin — Design System
 
 Tokens e especificações extraídos visualmente das telas **Task / Board (Overview)** nos temas Light e Dark, completados com estados, componentes e regras derivados da mesma linguagem visual.
 
 > Os valores são estimativas feitas a partir das imagens (sem acesso ao arquivo-fonte). Medidas convertidas para um artboard base de **1440px** (fator ≈ 1.17 sobre o screenshot). Itens marcados com **(derivado)** não aparecem nas imagens e foram definidos seguindo o estilo do design.
 
-**Arquivos de implementação** (fonte única para os projetos):
+**Arquivos de implementação** em `src/styles/tokens`. Execute os comandos deste documento a partir da raiz do repositório:
 
 | Arquivo | Uso |
 |---|---|
-| [tokens/tokens.css](tokens/tokens.css) | **Fonte única**: variáveis CSS com tema light (`:root`) e dark (`[data-theme="dark"]`) |
-| [tokens/tokens.json](tokens/tokens.json) | Gerado a partir do CSS no formato W3C Design Tokens (Style Dictionary / Tokens Studio) — `node tokens/build-json.js tokens/tokens.css tokens/tokens.json` |
-| [tokens/tailwind.preset.js](tokens/tailwind.preset.js) | Preset do Tailwind apontando para as variáveis CSS |
+| [tokens/tokens.css](../../src/styles/tokens/tokens.css) | **Fonte única**: variáveis CSS com tema light (`:root`) e dark (`[data-theme="dark"]`) |
+| [tokens/tokens.json](../../src/styles/tokens/tokens.json) | Gerado a partir do CSS no formato W3C Design Tokens (Style Dictionary / Tokens Studio) — `node scripts/generate-design-tokens.mjs src/styles/tokens/tokens.css src/styles/tokens/tokens.json` |
+| [tokens/tailwind.preset.js](../../src/styles/tokens/tailwind.preset.js) | Preset do Tailwind apontando para as variáveis CSS |
 
 ---
 
@@ -589,9 +589,9 @@ Regras:
 
 ## 14. Como aplicar em um projeto
 
-1. Copiar a pasta `tokens/` para o projeto (ou publicar como pacote interno).
-2. Importar `tokens/tokens.css` no CSS global e carregar a fonte Manrope.
-3. Com Tailwind: `presets: [require("./tokens/tailwind.preset.js")]` e usar classes como `bg-surface`, `text-secondary`, `rounded-xl`, `text-body-md`.
+1. Manter os arquivos de implementação em `src/styles/tokens/` e a especificação em `docs/design-system/`.
+2. Importar `../styles/tokens/tokens.css` em `src/app/globals.css` e carregar a fonte Manrope.
+3. Na aplicação, usar os mapeamentos de tokens em `@theme inline` no CSS global (Tailwind CSS 4). O preset `src/styles/tokens/tailwind.preset.js` fica disponível para integrações com configuração por preset.
 4. Sem Tailwind: usar as variáveis diretamente (`var(--color-bg-surface)`).
 5. Tema escuro: `document.documentElement.dataset.theme = "dark"`; padrão inicial seguindo `prefers-color-scheme`.
 6. Para outras plataformas (iOS, Android, Flutter), gerar a partir de `tokens.json` com Style Dictionary.

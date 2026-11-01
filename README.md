@@ -1,224 +1,200 @@
-# Controle de Horas - Sistema de Gestão de Horários de Trabalho
+﻿# Controle de Horas
 
-Um sistema completo para controle de horas trabalhadas, cálculo automático de horas extras e gestão de produtividade, desenvolvido com Next.js, TypeScript, Prisma e Supabase.
+Aplicação web para registrar jornadas de trabalho e acompanhar o saldo de horas extras. Desenvolvida com Next.js, TypeScript e PostgreSQL, com interface em português brasileiro e suporte a temas claro e escuro.
+
+## Índice
+
+- [Visão geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Desenvolvimento local](#desenvolvimento-local)
+- [Comandos](#comandos)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Implantação](#implantação)
+- [Contribuição](#contribuição)
+- [Documentação](#documentação)
+- [Licença](#licença)
+
+## Visão geral
+
+O fluxo começa com a criação de uma conta. Após o login, é possível registrar entradas e saídas, consultar o histórico e informar o uso de horas extras. O painel reúne os totais e permite acompanhar a jornada por calendário e gráficos.
+
+O banco de horas considera o total dos períodos encerrados em cada dia. A jornada diária é configurável por conta, com padrão de oito horas; alterar essa configuração recalcula o histórico. Períodos em aberto entram nos totais somente após o registro da saída.
 
 ## Funcionalidades
 
-### Autenticação e Segurança
-- **Login seguro** com NextAuth.js
-- **Registro de usuários** com validação
-- **Sessões JWT** para controle de acesso
-- **Proteção de rotas** autenticadas
+| Área | Recursos |
+| --- | --- |
+| Conta | Cadastro e acesso por e-mail e senha, com sessões JWT e registros associados ao usuário. |
+| Registro de ponto | Entrada e saída com o horário atual, com até um período em aberto por conta. |
+| Histórico | Inclusão manual, edição e exclusão de períodos, agrupamento por dia, filtros e paginação. |
+| Banco de horas | Cálculo de horas extras, registro de utilização e devolução ao saldo ao excluir um uso. |
+| Painel | Totais de horas, calendário mensal, gráfico diário e comparação mensal de horas extras geradas e utilizadas. |
+| Interface | Layout responsivo, temas claro e escuro e tabelas alternativas aos gráficos. |
 
-### Dashboard Interativo
-- **Visão geral** com estatísticas em tempo real
-- **Cards informativos**: Horas trabalhadas, dias úteis, média diária, saldo de horas extras
-- **Navegação intuitiva** entre módulos
-- **Interface responsiva** para desktop e mobile
+Os registros permitem vários períodos no mesmo dia, desde que não se sobreponham e que a saída seja posterior à entrada. O formulário de utilização de horas extras aceita horas e minutos (`4:39`) ou horas decimais (`4.65` ou `4,65`).
 
-### Controle de Horários
-- **Registro de entradas e saídas** de trabalho
-- **Suporte a múltiplas sessões** por dia
-- **Cálculo automático** de horas trabalhadas
-- **Busca e filtros** por data e descrição
-- **Paginação** para navegação eficiente
-- **CRUD completo** (criar, editar, excluir)
+## Tecnologias
 
-### Sistema de Horas Extras
-- **Cálculo automático** baseado em jornada de 8 horas/dia
-- **Controle de saldo** em tempo real
-- **Registro de utilização** com validação
-- **Formatos flexíveis**: Decimal (4.65) ou horas:minutos (4:39)
-- **Histórico completo** de uso
-- **Exclusão de registros** com devolução automática ao saldo
+| Camada | Tecnologias |
+| --- | --- |
+| Aplicação | Next.js 16, React 19 e TypeScript |
+| Interface | Tailwind CSS 4, shadcn/ui, Radix UI e Tabler Icons |
+| Formulários | React Hook Form e Zod |
+| Autenticação | NextAuth.js com provedor Credentials e bcrypt |
+| Persistência | PostgreSQL e Prisma ORM 6 |
+| Implantação | Configuração para Vercel; PostgreSQL pode ser hospedado no Supabase |
 
-### Interface Responsiva
-- **Menu adaptativo**: Desktop (horizontal) e Mobile (dropdown)
-- **Design moderno** com shadcn/ui
-- **Tema escuro/claro** com persistência
-- **Feedback visual** com alertas e notificações
-- **Estados de loading** e skeletons
+As versões e dependências completas estão em [package.json](package.json), com resolução registrada em [package-lock.json](package-lock.json).
 
-## Tecnologias Utilizadas
+## Desenvolvimento local
 
-- **Frontend:** Next.js 16, React 19, TypeScript
-- **Styling:** Tailwind CSS, shadcn/ui, Radix UI
-- **Backend:** Next.js API Routes
-- **Database:** PostgreSQL via Prisma ORM
-- **Auth:** NextAuth.js com provedor Credentials
-- **Deploy:** Vercel com Supabase
-- **Outros:** date-fns, lucide-react, sonner
+### Pré-requisitos
 
-## Pré-requisitos
+- Node.js 20.9 ou superior, conforme o requisito da versão instalada do Next.js.
+- npm.
+- Uma instância PostgreSQL acessível, local ou hospedada.
 
-- Node.js 18+
-- PostgreSQL (via Supabase ou local)
-- npm/yarn/pnpm
+### 1. Obter o código
 
-## Instalação e Configuração
-
-### 1. Clone o repositório
 ```bash
-git clone <seu-repositorio>
-cd controle-horas
+git clone https://github.com/henriquemachado1993/time-control.git
+cd time-control
 ```
 
-### 2. Instale as dependências
+### 2. Instalar as dependências
+
 ```bash
-npm install
+npm ci
 ```
 
-### 3. Configure o banco de dados
+O script `postinstall` gera o cliente Prisma automaticamente.
+
+### 3. Configurar o ambiente
+
 Crie um arquivo `.env` na raiz do projeto:
 
-```env
-# Banco de dados PostgreSQL (Supabase recomendado)
-DATABASE_URL="postgresql://usuario:senha@host:porta/banco"
-DIRECT_URL="postgresql://usuario:senha@host:porta/banco"
-
-# NextAuth
-NEXTAUTH_SECRET="sua-chave-secreta-super-segura-aqui"
-NEXTAUTH_URL="http://localhost:3000" # ou sua URL de produção
+```dotenv
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/controle_horas"
+DIRECT_URL="postgresql://usuario:senha@localhost:5432/controle_horas"
+NEXTAUTH_SECRET="substitua-por-um-segredo-aleatorio"
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
-### 4. Configure o banco de dados
+| Variável | Finalidade |
+| --- | --- |
+| `DATABASE_URL` | Conexão PostgreSQL utilizada pela aplicação. Pode usar o pool de conexões do provedor. |
+| `DIRECT_URL` | Conexão direta ao PostgreSQL utilizada pelo Prisma nas migrações. Em uma instalação local, pode ser igual a `DATABASE_URL`. |
+| `NEXTAUTH_SECRET` | Segredo utilizado pela autenticação. Gere um valor próprio para cada ambiente. |
+| `NEXTAUTH_URL` | URL base da aplicação. |
+
+Para gerar um segredo:
+
 ```bash
-# Execute as migrações
-npx prisma migrate dev
-
-# Gere o cliente Prisma
-npx prisma generate
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 ```
 
-### 5. Execute o projeto
+O arquivo `.env` é ignorado pelo Git. Mantenha credenciais fora do controle de versão.
+
+### 4. Aplicar as migrações
+
+Com o banco disponível e as variáveis configuradas:
+
+```bash
+npx prisma migrate deploy
+```
+
+Esse comando aplica as migrações existentes. Ao desenvolver alterações no esquema, utilize `npx prisma migrate dev` para criar uma nova migração.
+
+### 5. Iniciar a aplicação
+
 ```bash
 npm run dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000) no navegador.
+Acesse [localhost:3000](http://localhost:3000) e crie uma conta na tela de acesso.
 
-## Como Usar
+## Comandos
 
-### Primeiro Acesso
-1. **Acesse a aplicação**
-2. **Clique em "Criar conta"** para registrar um novo usuário
-3. **Faça login** com suas credenciais
+| Comando | Finalidade |
+| --- | --- |
+| `npm run dev` | Iniciar o servidor de desenvolvimento com Turbopack. |
+| `npm run build` | Gerar o cliente Prisma e compilar a aplicação para produção. |
+| `npm run start` | Iniciar o servidor de produção após a compilação. |
+| `npx tsc --noEmit` | Verificar os tipos sem emitir arquivos JavaScript. |
+| `npx eslint src/caminho/do/arquivo.tsx` | Executar ESLint nos arquivos informados. |
+| `npx prisma generate` | Gerar novamente o cliente Prisma. |
+| `npx prisma migrate dev` | Criar e aplicar migrações durante o desenvolvimento. |
+| `npx prisma migrate deploy` | Aplicar migrações existentes no banco de destino. |
+| `npx prisma studio` | Abrir a interface de consulta e edição do banco. |
 
-### Registrando Horários
-1. **Acesse "Registros de Horas"**
-2. **Use "Bater entrada"** para registrar imediatamente a hora atual; depois, use **"Bater saída"** para encerrar o período.
-3. Períodos em andamento aparecem na listagem e podem ser editados para preencher uma saída esquecida. Eles não entram nos totais até serem encerrados.
-4. **Ou clique em "Novo Registro"** para informar os horários manualmente.
-5. Para lançamentos manuais, **preencha** data, entrada, saída e descrição opcional e salve o registro.
+O script `npm run lint` ainda utiliza `next lint`, removido no Next.js 16. Utilize a CLI do ESLint diretamente, como indicado acima.
 
-### Gerenciando Horas Extras
-1. **Acesse "Horas Extras"**
-2. **Verifique o saldo disponível** nos cards
-3. **Registre uso** informando data e horas utilizadas
-4. **Formatos aceitos**: `4.65` (decimal) ou `4:39` (horas:minutos)
+## Estrutura do projeto
 
-### Dashboard
-- **Visão geral** de todas as estatísticas
-- **Links diretos** para funcionalidades específicas
-- **Atualização automática** dos dados
-
-## Estrutura do Projeto
-
-```
-controle-horas/
-├── src/
-│   ├── app/
-│   │   ├── (dashboard)/          # Grupo de rotas autenticadas
-│   │   │   ├── dashboard/        # Página inicial com estatísticas
-│   │   │   ├── horarios/         # Gestão de horários
-│   │   │   └── horas-extras/     # Controle de horas extras
-│   │   ├── api/                  # API Routes
-│   │   │   ├── auth/             # Autenticação
-│   │   │   ├── cron/             # Tarefas automáticas
-│   │   │   ├── horarios/         # CRUD de horários
-│   │   │   └── horas-extras/     # Gestão de horas extras
-│   │   └── globals.css          # Estilos globais
-│   ├── components/
-│   │   ├── ui/                   # Componentes shadcn/ui
-│   │   ├── navigation.tsx        # Menu de navegação
-│   │   └── theme-*               # Tema e toggle
-│   ├── hooks/
-│   │   └── use-mobile.ts         # Hook para detectar mobile
-│   └── lib/
-│       ├── auth.ts               # Configuração NextAuth
-│       └── prisma.ts             # Cliente Prisma
-├── prisma/
-│   ├── schema.prisma             # Schema do banco
-│   └── migrations/               # Migrações do banco
-├── public/                       # Arquivos estáticos
-└── package.json
+```text
+time-control/
+|-- docs/                   Documentação de produto, memória técnica e design system
+|-- prisma/
+|   |-- migrations/         Histórico de migrações
+|   `-- schema.prisma       Modelos de dados
+|-- public/                 Arquivos estáticos
+|-- scripts/                Scripts de manutenção e geração de artefatos
+|-- src/
+|   |-- app/
+|   |   |-- (dashboard)/    Painel, registros de horas e banco de horas
+|   |   |-- api/            Autenticação, registros, configurações e tarefas
+|   |   `-- login/          Tela de acesso
+|   |-- components/         Componentes da aplicação e biblioteca de UI
+|   |-- hooks/              Hooks compartilhados
+|   |-- lib/                Autenticação, banco de dados e cálculos de horas
+|   `-- styles/tokens/      Tokens CSS, exportação JSON e preset do Tailwind
+|-- package.json            Dependências e scripts
+`-- vercel.json             Agendamento de tarefa na Vercel
 ```
 
-## Schema do Banco de Dados
+### Tokens de design
 
-### Usuários e Autenticação
-- `User`: Dados do usuário
-- `Account`: Contas vinculadas (NextAuth)
-- `Session`: Sessões ativas
-- `VerificationToken`: Tokens de verificação
+Os tokens utilizados pela aplicação ficam em `src/styles/tokens`. O arquivo `tokens.css` é a fonte dos valores e é importado por `src/app/globals.css`. A especificação visual fica em [docs/design-system](docs/design-system/admin-design-tokens.md).
 
-### Controle de Horas
-- `work_hours`: Registros de horários trabalhados
-- `extra_hours_bank`: Bancos de horas extras (calculado automaticamente)
-- `extra_hours_usage`: Registros de uso de horas extras
-
-### Monitoramento
-- `ConnectionHeartbeat`: Heartbeat para monitoramento
-
-## Deploy na Vercel
-
-### Configuração Automática
-O projeto já está configurado para deploy na Vercel:
-
-1. **Conecte seu repositório** no painel da Vercel
-2. **Configure as variáveis de ambiente**:
-   ```env
-   DATABASE_URL=sua_string_de_conexao_Supabase
-   DIRECT_URL=sua_string_de_conexao_Supabase
-   NEXTAUTH_SECRET=sua_chave_secreta_segura
-   NEXTAUTH_URL=https://seu-projeto.vercel.app
-   ```
-3. **Deploy automático** será executado
-
-### Soluções Implementadas
-- ✅ `prisma generate` no build
-- ✅ Scripts de `postinstall`
-- ✅ Arquivo `vercel.json` com timeouts
-- ✅ Otimizações para serverless
-
-## 🔧 Scripts Disponíveis
+Após alterar o CSS, atualize a exportação JSON executando, na raiz do repositório:
 
 ```bash
-# Desenvolvimento
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build de produção
-npm run start        # Servidor de produção
-
-# Banco de dados
-npx prisma studio    # Interface gráfica do Prisma
-npx prisma migrate dev  # Executar migrações
-npx prisma generate  # Gerar cliente Prisma
-
-# Qualidade
-npm run lint         # Executar ESLint
+node scripts/generate-design-tokens.mjs src/styles/tokens/tokens.css src/styles/tokens/tokens.json
 ```
+
+O arquivo `tailwind.preset.js` é uma configuração auxiliar; a aplicação utiliza Tailwind CSS 4 com mapeamentos em `globals.css`.
+
+## Implantação
+
+Para implantar na Vercel:
+
+1. Importe o repositório no painel da plataforma.
+2. Configure as quatro variáveis de ambiente descritas em [Desenvolvimento local](#3-configurar-o-ambiente), usando as conexões do banco de destino e a URL pública em `NEXTAUTH_URL`.
+3. Aplique as migrações ao banco de destino com `npx prisma migrate deploy`, em um ambiente configurado para esse banco.
+4. Execute a implantação com o comando de build `npm run build`.
+
+O build gera o cliente Prisma, mas não aplica migrações. O arquivo [vercel.json](vercel.json) também define uma execução diária da rota `/api/cron`, com expressão `0 10 * * *` (10h UTC).
 
 ## Contribuição
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+Antes de alterar o projeto, consulte as [instruções do repositório](AGENTS.md) e o [contexto do produto](docs/PRODUCT.md). Para mudanças em autenticação, dados de conta, datas, horários ou cálculo de horas extras, leia também [MEMORY.md](docs/MEMORY.md).
+
+1. Crie uma branch para a alteração.
+2. Implemente a mudança seguindo as convenções existentes.
+3. Execute `npm run build`, `npx tsc --noEmit` e ESLint nos arquivos de código alterados.
+4. Abra um pull request descrevendo o problema, a solução e as verificações realizadas.
+
+Preserve a interface em português brasileiro, os dois temas e os componentes compartilhados. Novos ícones de interface devem usar imports nomeados `Icon*` de `@tabler/icons-react`.
+
+## Documentação
+
+- [Produto](docs/PRODUCT.md): propósito, fluxos, capacidades e restrições.
+- [Instruções do repositório](AGENTS.md): convenções para alterações.
+- [Memória técnica](docs/MEMORY.md): decisões e cuidados com regras sensíveis.
+- [Esquema de dados](prisma/schema.prisma): modelos e índices do PostgreSQL.
+- [Design system](docs/design-system/admin-design-tokens.md): especificação visual e manutenção dos tokens.
 
 ## Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
----
-
+Este projeto está disponível sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para os termos completos.

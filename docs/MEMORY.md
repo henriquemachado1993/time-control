@@ -1,6 +1,6 @@
 # Project memory
 
-Durable implementation details for future agents. Product intent and unresolved product decisions live in [PRODUCT.md](PRODUCT.md); repository working rules live in [AGENTS.md](AGENTS.md).
+Durable implementation details for future agents. Product intent and unresolved product decisions live in [PRODUCT.md](PRODUCT.md); repository working rules live in [AGENTS.md](../AGENTS.md).
 
 ## Account ownership
 

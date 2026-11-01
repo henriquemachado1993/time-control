@@ -12,6 +12,8 @@ NextAuth authenticates each account. API handlers find the account from the serv
 
 `src/lib/hours.ts` provides shared `formatHours` and `workedHours` helpers for the UI. Keep visible durations in whole minutes and use tabular numerals for totals.
 
+`src/lib/work-days.ts` owns `summarizeWorkDays`, shared by the history and dashboard. Its days include open periods, while minutes and `completedDayCount` include only closed periods. Dates stay literal calendar keys; days are returned newest first without mutating input records. The dashboard reuses one summary across metrics, recent days, calendar and daily chart. Description-filtered history keeps a separate full summary for complete daily totals.
+
 ## Overtime calculation
 
 Extra hours are computed from the day's summed work intervals, applying the account's `User.dailyTargetMinutes` baseline to each day. Existing accounts receive the eight-hour default (480 minutes). The daily target API is `src/app/api/configuracoes/jornada/route.ts`; the available balance is generated hours minus recorded uses, clamped at zero. `src/lib/overtime.ts` owns the calculation, shared by the balance and usage handlers and the scheduled task. Sum whole minutes before converting to decimal hours. When editing usage, the caller excludes that record from the usage aggregate and preserves the existing amount as the minimum allowed ceiling after a target change. Run `npm test` for calculation and handler regression coverage.

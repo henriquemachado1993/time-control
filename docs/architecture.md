@@ -43,6 +43,16 @@ O ponto compartilhado em `src/components/clock-punch.tsx` aceita uma versão dos
 
 A autorização permanece nos handlers do servidor, com a identidade obtida da sessão e as consultas privadas limitadas à conta autenticada. As regras compartilhadas de duração e validação continuam em `src/lib/hours.ts` e `src/lib/work-hours.ts`.
 
+## Leitura compartilhada dos dias de trabalho
+
+`src/lib/work-days.ts` concentra o agrupamento por data, a soma de minutos encerrados e a contagem de dias com períodos encerrados. `summarizeWorkDays` recebe os registros e retorna os dias em ordem decrescente, seus períodos, minutos e quantidade de períodos encerrados, além dos totais gerais. O módulo preserva as datas de calendário e não altera os registros recebidos.
+
+O painel calcula esse resumo uma vez por atualização dos registros e o distribui aos indicadores, registros recentes, calendário e gráfico diário. A seleção de mês e dia continua pertencendo às visualizações.
+
+O histórico mantém um resumo completo e outro dos resultados filtrados. Os resultados determinam quais períodos e dias aparecem e o total encontrado; o resumo completo fornece a duração e a quantidade total de períodos de cada dia, mesmo durante uma busca por descrição.
+
+Um dia com apenas um período aberto aparece no histórico, nos registros recentes e no calendário, com zero minutos trabalhados. Os indicadores de dias trabalhados e média diária consideram dias com pelo menos um período encerrado. A apuração de horas extras continua separada em `src/lib/overtime.ts`.
+
 ## Painel e calendário
 
 Os arquivos específicos do painel ficam em `src/app/(dashboard)/dashboard`, nas pastas `components`, `hooks` e `lib`, sem prefixo `_`. A página aguarda a sessão e monta a tela; o antigo `src/components/dashboard-insights.tsx`, usado somente no painel, foi dividido e movido para essa funcionalidade.
@@ -54,7 +64,7 @@ Os arquivos específicos do painel ficam em `src/app/(dashboard)/dashboard`, nas
 | `dashboard-metrics.tsx` | Calcular e apresentar os totais e a média diária, excluindo períodos em aberto da duração e contando dias com períodos encerrados. |
 | `recent-work-days.tsx` | Apresentar os cinco dias mais recentes, incluindo períodos em aberto. |
 | `dashboard-bank.tsx` | Apresentar o resumo do banco de horas e o acesso ao extrato. |
-| `dashboard-insights.tsx` | Manter o mês compartilhado pelas análises e pelo calendário e agrupar os períodos por dia. |
+| `dashboard-insights.tsx` | Manter o mês compartilhado pelas análises e pelo calendário e distribuir os dias já agrupados. |
 | `work-calendar.tsx` | Manter a seleção do dia, navegar entre meses, retornar ao dia atual e apresentar os períodos e suas durações. |
 | `monthly-work-chart.tsx` | Apresentar as horas de cada dia do mês comparadas à jornada configurada. |
 | `monthly-overtime-chart.tsx` | Apresentar geração e utilização nos seis meses até o mês selecionado. |

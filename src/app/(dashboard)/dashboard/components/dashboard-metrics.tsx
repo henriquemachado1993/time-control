@@ -1,10 +1,10 @@
-import { formatHours, workedHours } from "@/lib/hours";
-import type { DashboardWorkHour } from "../lib/types";
+import { formatHours } from "@/lib/hours";
+import type { DashboardDays } from "../lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-type Props = { records: DashboardWorkHour[]; available: number; loading: boolean };
-export function DashboardMetrics({ records, available, loading }: Props) {
-  const totalHours = records.reduce((total, record) => total + workedHours(record.start_time, record.end_time), 0);
-  const totalDays = new Set(records.filter(record => record.end_time).map(record => record.date.slice(0, 10))).size;
+type Props = { summary: DashboardDays; available: number; loading: boolean };
+export function DashboardMetrics({ summary, available, loading }: Props) {
+  const totalHours = summary.totalMinutes / 60;
+  const totalDays = summary.completedDayCount;
   const metrics = [
     { label: "Total de Horas", value: formatHours(totalHours), description: "Horas trabalhadas no total" },
     { label: "Dias Trabalhados", value: totalDays.toString(), description: "Dias com registros" },

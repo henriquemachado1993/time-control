@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { IconRefresh } from "@tabler/icons-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ClockPunch } from "@/components/clock-punch";
+import { summarizeWorkDays } from "@/lib/work-days";
 import { useDashboard } from "../hooks/use-dashboard";
 import { DashboardBank } from "./dashboard-bank";
 import { DashboardInsights } from "./dashboard-insights";
@@ -12,7 +14,7 @@ import { RecentWorkDays } from "./recent-work-days";
 
 export function DashboardScreen() {
   const { data, loading, error, refresh } = useDashboard();
-  const records = data?.records ?? [];
+  const summary = useMemo(() => summarizeWorkDays(data?.records ?? []), [data?.records]);
 
   return (
     <div className="mx-auto max-w-layout space-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -29,10 +31,10 @@ export function DashboardScreen() {
           <Button variant="outline" onClick={() => void refresh()}><IconRefresh aria-hidden="true" />Tentar novamente</Button>
         </Alert>
       ) : <>
-        <DashboardMetrics records={records} available={data?.bank.available ?? 0} loading={loading} />
-        <DashboardInsights records={records} dailyTargetMinutes={data?.dailyTargetMinutes ?? 480} generatedHoursByDate={data?.bank.breakdown_by_date ?? {}} usages={data?.usages ?? []} loading={loading} />
+        <DashboardMetrics summary={summary} available={data?.bank.available ?? 0} loading={loading} />
+        <DashboardInsights days={summary.days} dailyTargetMinutes={data?.dailyTargetMinutes ?? 480} generatedHoursByDate={data?.bank.breakdown_by_date ?? {}} usages={data?.usages ?? []} loading={loading} />
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <RecentWorkDays records={records} loading={loading} />
+          <RecentWorkDays days={summary.days} loading={loading} />
           <DashboardBank bank={data?.bank} loading={loading} />
         </div>
       </>}

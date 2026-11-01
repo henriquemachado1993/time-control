@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { workedMinutes } from "@/lib/hours";
+import { summarizeWorkDays } from "@/lib/work-days";
 import type { WorkHour, PeriodPreset } from "../lib/types";
 function getPeriodRange(preset: Exclude<PeriodPreset, "all" | "custom">) {
   const today = dayjs().startOf("day");
@@ -16,18 +16,6 @@ function getPeriodRange(preset: Exclude<PeriodPreset, "all" | "custom">) {
   }
 
   return { from: today.startOf("month").format("YYYY-MM-DD"), to: today.endOf("month").format("YYYY-MM-DD") };
-}
-
-function groupByDate(workHours: WorkHour[]) {
-  const groups: { [key: string]: WorkHour[] } = {};
-  workHours.forEach(workHour => {
-    const data = workHour.date.slice(0, 10);
-    if (!groups[data]) {
-      groups[data] = [];
-    }
-    groups[data].push(workHour);
-  });
-  return groups;
 }
 
 const DAYS_PER_PAGE = 5;
@@ -99,29 +87,22 @@ export function useWorkHoursHistory() {
     );
   }, [horarios, activeSearchDescription]);
 
-  const horariosAgrupados = groupByDate(horariosFiltrados);
-  const diasOrdenados = Object.entries(horariosAgrupados).sort(([a], [b]) => b.localeCompare(a));
-  const totaisPorData = useMemo(() => {
-    const totals: Record<string, { minutes: number; count: number }> = {};
-    horarios.forEach((horario) => {
-      const key = horario.date.slice(0, 10);
-      const current = totals[key] ?? { minutes: 0, count: 0 };
-      current.minutes += workedMinutes(horario.start_time, horario.end_time);
-      current.count += 1;
-      totals[key] = current;
-    });
-    return totals;
-  }, [horarios]);
+  const fullSummary = useMemo(() => summarizeWorkDays(horarios), [horarios]);
+  const filteredSummary = useMemo(
+    () => horariosFiltrados === horarios ? fullSummary : summarizeWorkDays(horariosFiltrados),
+    [horariosFiltrados, horarios, fullSummary],
+  );
+  const diasOrdenados = [...filteredSummary.days].map(([date, day]) => [date, day.records] as const);
+  const totaisPorData = useMemo(() => Object.fromEntries(
+    [...fullSummary.days].map(([date, day]) => [date, { minutes: day.minutes, count: day.records.length }]),
+  ), [fullSummary]);
 
   const totalDias = diasOrdenados.length;
   const totalPaginas = Math.ceil(totalDias / DAYS_PER_PAGE);
   const startIndex = (currentPage - 1) * DAYS_PER_PAGE;
   const endIndex = startIndex + DAYS_PER_PAGE;
   const diasPaginados = diasOrdenados.slice(startIndex, endIndex);
-  const totalEncontradoMinutos = horariosFiltrados.reduce(
-    (total, horario) => total + workedMinutes(horario.start_time, horario.end_time),
-    0,
-  );
+  const totalEncontradoMinutos = filteredSummary.totalMinutes;
 
   useEffect(() => {
     const lastPage = Math.max(1, totalPaginas);

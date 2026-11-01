@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { IconArrowRight, IconCalendarWeek, IconClock, IconPlus } from "@tabler/icons-react";
-import { formatHours, workedHours } from "@/lib/hours";
-import type { DashboardWorkHour } from "../lib/types";
+import { formatHours } from "@/lib/hours";
+import type { DashboardDay } from "../lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 const dateLabel = (date: string) => new Date(`${date.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", weekday: "short" });
 
-export function RecentWorkDays({ records, loading }: { records: DashboardWorkHour[]; loading: boolean }) {
-  const recentDays = Array.from(new Set(records.map(record => record.date.slice(0, 10)))).sort((a, b) => b.localeCompare(a)).slice(0, 5);
+export function RecentWorkDays({ days, loading }: { days: Map<string, DashboardDay>; loading: boolean }) {
+  const recentDays = [...days].slice(0, 5);
   return (
     <Card className="min-w-0 gap-0 overflow-hidden">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-5">
@@ -19,14 +19,13 @@ export function RecentWorkDays({ records, loading }: { records: DashboardWorkHou
         {loading ? <div className="space-y-4 px-6" aria-label="Carregando registros">{Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
           : recentDays.length ? (
             <div className="divide-y border-t">
-              {recentDays.map(date => {
-                const dayRecords = records.filter(record => record.date.slice(0, 10) === date);
+              {recentDays.map(([date, { records: dayRecords, minutes }]) => {
                 return <div key={date} className="flex items-center justify-between gap-3 px-6 py-4">
                   <div className="flex min-w-0 items-center gap-3">
                     <IconCalendarWeek className="hidden size-4 shrink-0 text-muted-foreground sm:block" aria-hidden="true" />
                     <div className="min-w-0"><p className="text-sm font-medium capitalize">{dateLabel(date)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{dayRecords.length} {dayRecords.length === 1 ? "registro" : "registros"} · {dayRecords.map(record => `${record.start_time.slice(0, 5)}–${record.end_time?.slice(0, 5) ?? "Em andamento"}`).join(" / ")}</p></div>
                   </div>
-                  <span className="shrink-0 text-sm font-semibold tabular-nums">{formatHours(dayRecords.reduce((total, record) => total + workedHours(record.start_time, record.end_time), 0))}</span>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums">{formatHours(minutes / 60)}</span>
                 </div>;
               })}
             </div>

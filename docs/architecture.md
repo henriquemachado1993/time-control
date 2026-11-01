@@ -43,6 +43,30 @@ O ponto compartilhado em `src/components/clock-punch.tsx` aceita uma versão dos
 
 A autorização permanece nos handlers do servidor, com a identidade obtida da sessão e as consultas privadas limitadas à conta autenticada. As regras compartilhadas de duração e validação continuam em `src/lib/hours.ts` e `src/lib/work-hours.ts`.
 
+## Painel e calendário
+
+Os arquivos específicos do painel ficam em `src/app/(dashboard)/dashboard`, nas pastas `components`, `hooks` e `lib`, sem prefixo `_`. A página aguarda a sessão e monta a tela; o antigo `src/components/dashboard-insights.tsx`, usado somente no painel, foi dividido e movido para essa funcionalidade.
+
+| Módulo | Responsabilidade |
+| --- | --- |
+| `dashboard-screen.tsx` | Compor o painel e atualizar os dados após entrada ou saída pelo ponto. |
+| `use-dashboard.ts` | Consultar registros, saldo, jornada e usos; publicar o conjunto completo; cancelar consultas substituídas ou após desmontagem; permitir nova tentativa após falha. |
+| `dashboard-metrics.tsx` | Calcular e apresentar os totais e a média diária, excluindo períodos em aberto da duração e contando dias com períodos encerrados. |
+| `recent-work-days.tsx` | Apresentar os cinco dias mais recentes, incluindo períodos em aberto. |
+| `dashboard-bank.tsx` | Apresentar o resumo do banco de horas e o acesso ao extrato. |
+| `dashboard-insights.tsx` | Manter o mês compartilhado pelas análises e pelo calendário e agrupar os períodos por dia. |
+| `work-calendar.tsx` | Manter a seleção do dia, navegar entre meses, retornar ao dia atual e apresentar os períodos e suas durações. |
+| `monthly-work-chart.tsx` | Apresentar as horas de cada dia do mês comparadas à jornada configurada. |
+| `monthly-overtime-chart.tsx` | Apresentar geração e utilização nos seis meses até o mês selecionado. |
+| `duration-chart.tsx` | Renderizar os dois gráficos e suas tabelas acessíveis a partir dos mesmos valores. |
+| `lib/dates.ts` | Interpretar e formatar datas de calendário no horário local. |
+
+A navegação no calendário atualiza as duas análises. O dia selecionado pertence ao calendário: trocar o mês seleciona seu primeiro dia; o botão Hoje restaura o mês e a data atuais. Dias com períodos em aberto aparecem no calendário e nos registros recentes, mas somente períodos encerrados somam horas trabalhadas. Dias sem registro não indicam ausência ou folga.
+
+O carregamento publica as quatro respostas em conjunto e preserva a seleção mensal durante uma atualização bem-sucedida após bater ponto. Se uma consulta falhar, o painel apresenta a ação de nova tentativa. Essa coordenação de apresentação não constitui uma leitura transacional do banco.
+
+Os testes de datas verificam a preservação do dia local em diferentes fusos e a normalização de meses na virada do ano e em ano bissexto. As verificações no navegador usam dados fictícios para exercitar seleção de dias, virada de ano, gráficos e tabelas equivalentes, ponto, recuperação de erro e estados vazios.
+
 ## Banco de horas
 
 ### Página de horas extras

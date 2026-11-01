@@ -118,7 +118,7 @@ Acesse [localhost:3000](http://localhost:3000) e crie uma conta na tela de acess
 
 | Comando | Finalidade |
 | --- | --- |
-| `npm test` | Executar os testes de regressão do banco de horas e de seus handlers. |
+| `npm test` | Executar os testes do banco de horas, de seus handlers e das datas do painel. |
 | `npm run dev` | Iniciar o servidor de desenvolvimento com Turbopack. |
 | `npm run build` | Gerar o cliente Prisma e compilar a aplicação para produção. |
 | `npm run start` | Iniciar o servidor de produção após a compilação. |
@@ -190,7 +190,7 @@ Preserve a interface em português brasileiro, os dois temas e os componentes co
 
 ## Documentação
 
-- [Arquitetura](docs/architecture.md): organização por funcionalidade e responsabilidades dos módulos de horários.
+- [Arquitetura](docs/architecture.md): organização por funcionalidade e responsabilidades dos módulos de horários, horas extras e painel.
 - [Produto](docs/PRODUCT.md): propósito, fluxos, capacidades e restrições.
 - [Instruções do repositório](AGENTS.md): convenções para alterações.
 - [Memória técnica](docs/MEMORY.md): decisões e cuidados com regras sensíveis.

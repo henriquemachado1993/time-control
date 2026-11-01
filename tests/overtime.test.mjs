@@ -1,26 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
-import ts from "typescript";
-
-// Load the real TypeScript implementation; replace only server dependencies.
-function loadSource(file, dependencies = {}) {
-  const filename = path.resolve(file);
-  const source = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
-    fileName: filename,
-  }).outputText;
-  const localRequire = createRequire(filename);
-  const result = { exports: {} };
-  new Function("require", "module", "exports", source)((id) => {
-    if (Object.hasOwn(dependencies, id)) return dependencies[id];
-    if (id.startsWith(".")) return loadSource(path.resolve(path.dirname(filename), id + ".ts"));
-    return localRequire(id);
-  }, result, result.exports);
-  return result.exports;
-}
+import { loadSource } from "./helpers/load-source.mjs";
 
 const overtime = loadSource("src/lib/overtime.ts");
 const { calculateOvertime } = overtime;

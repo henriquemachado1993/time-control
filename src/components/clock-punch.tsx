@@ -17,6 +17,7 @@ type OpenWorkHour = {
 
 type ClockPunchProps = {
   onRecordsChanged?: () => void
+  recordsVersion?: number
 }
 
 function getLocalDateTime() {
@@ -34,7 +35,7 @@ function formatDate(date: string) {
   })
 }
 
-export function ClockPunch({ onRecordsChanged }: ClockPunchProps) {
+export function ClockPunch({ onRecordsChanged, recordsVersion = 0 }: ClockPunchProps) {
   const [openRecord, setOpenRecord] = React.useState<OpenWorkHour | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [statusReady, setStatusReady] = React.useState(false)
@@ -59,7 +60,7 @@ export function ClockPunch({ onRecordsChanged }: ClockPunchProps) {
 
   React.useEffect(() => {
     void loadOpenRecord()
-  }, [loadOpenRecord])
+  }, [loadOpenRecord, recordsVersion])
 
   const today = getLocalDateTime().date
   const openFromAnotherDay = !!openRecord && openRecord.date !== today

@@ -189,6 +189,7 @@ Preserve a interface em português brasileiro, os dois temas e os componentes co
 
 ## Documentação
 
+- [Arquitetura](docs/architecture.md): organização por funcionalidade e responsabilidades dos módulos de horários.
 - [Produto](docs/PRODUCT.md): propósito, fluxos, capacidades e restrições.
 - [Instruções do repositório](AGENTS.md): convenções para alterações.
 - [Memória técnica](docs/MEMORY.md): decisões e cuidados com regras sensíveis.

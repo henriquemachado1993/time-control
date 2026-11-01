@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { calculateOvertime } from "@/lib/overtime";
 
 // Impede cache e otimização estática pelo Next.js/Vercel
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ async function recalculateExtraHours(prismaClient: PrismaClient) {
 
     // Buscar todos os usuários
     const users = await prismaClient.user.findMany({
-      select: { id: true, email: true }
+      select: { id: true, email: true, dailyTargetMinutes: true }
     });
 
     let totalProcessed = 0;
@@ -23,37 +24,7 @@ async function recalculateExtraHours(prismaClient: PrismaClient) {
         orderBy: { date: "asc" },
       });
 
-      // Calcular horas trabalhadas por dia (agrupar sessões)
-      const workedHoursByDate: { [key: string]: number } = {};
-
-      workHours.forEach(hour => {
-        if (!hour.end_time) return;
-
-        const start = new Date(`2000-01-01T${hour.start_time}`);
-        const end = new Date(`2000-01-01T${hour.end_time}`);
-        const workedMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-        const workedHours = workedMinutes / 60;
-
-        if (!workedHoursByDate[hour.date]) {
-          workedHoursByDate[hour.date] = 0;
-        }
-        workedHoursByDate[hour.date] += workedHours;
-      });
-
-      // Calcular horas extras baseadas no total diário
-      const extraHoursByDate: { [key: string]: number } = {};
-
-      for (const [date, totalWorkedHours] of Object.entries(workedHoursByDate)) {
-        // Considerando 8 horas como jornada padrão
-        const standardHours = 8;
-        const extraHours = Math.max(0, totalWorkedHours - standardHours);
-
-        if (extraHours > 0) {
-          extraHoursByDate[date] = extraHours;
-        }
-      }
-
-      const totalGenerated = Object.values(extraHoursByDate).reduce((sum, hours) => sum + hours, 0);
+      const { total_generated: totalGenerated } = calculateOvertime(workHours, user.dailyTargetMinutes);
 
       // Verificar se as horas extras mudaram (poderia implementar cache ou comparação)
       console.info(`[RecalculateExtraHours] User ${user.email}: ${totalGenerated.toFixed(2)}h extra hours generated`);

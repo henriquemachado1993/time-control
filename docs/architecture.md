@@ -42,3 +42,11 @@ O estado do formulário pertence ao editor e é reiniciado quando ele é fechado
 O ponto compartilhado em `src/components/clock-punch.tsx` aceita uma versão dos registros para renovar a consulta após edição ou exclusão. Entrada e saída pelo ponto comunicam suas alterações ao histórico. A atualização preserva os filtros aplicados e a página, ajustando-a quando a última página deixa de existir.
 
 A autorização permanece nos handlers do servidor, com a identidade obtida da sessão e as consultas privadas limitadas à conta autenticada. As regras compartilhadas de duração e validação continuam em `src/lib/hours.ts` e `src/lib/work-hours.ts`.
+
+## Banco de horas
+
+`src/lib/overtime.ts` concentra a apuração diária em `calculateOvertime`: recebe períodos, jornada diária em minutos e horas já utilizadas; retorna geração por dia, total gerado, total utilizado e saldo disponível. Períodos em aberto ficam fora da apuração, dias abaixo da jornada não descontam extras de outros dias e o saldo disponível tem mínimo zero.
+
+Os handlers de consulta, criação e edição de uso buscam somente os dados da conta autenticada e chamam esse mesmo cálculo. Na edição, a soma de usos exclui o registro atual; o valor já registrado pode ser mantido mesmo quando uma mudança de jornada reduz o saldo. A tarefa agendada também fornece a jornada de cada conta ao cálculo; sua apuração é registrada em log, sem gravar um saldo calculado no banco.
+
+`npm test` executa os testes de regressão do cálculo e dos handlers com dependências de sessão e banco simuladas. Os testes verificam as respostas, os limites de uso, a seleção da jornada na tarefa agendada e o escopo das consultas por conta, sem acessar um banco real.

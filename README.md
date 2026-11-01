@@ -118,6 +118,7 @@ Acesse [localhost:3000](http://localhost:3000) e crie uma conta na tela de acess
 
 | Comando | Finalidade |
 | --- | --- |
+| `npm test` | Executar os testes de regressão do banco de horas e de seus handlers. |
 | `npm run dev` | Iniciar o servidor de desenvolvimento com Turbopack. |
 | `npm run build` | Gerar o cliente Prisma e compilar a aplicação para produção. |
 | `npm run start` | Iniciar o servidor de produção após a compilação. |

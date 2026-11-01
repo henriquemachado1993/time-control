@@ -14,7 +14,7 @@ NextAuth authenticates each account. API handlers find the account from the serv
 
 ## Overtime calculation
 
-Extra hours are computed from the day's summed work intervals, applying the account's `User.dailyTargetMinutes` baseline to each day. Existing accounts receive the eight-hour default (480 minutes). The daily target API is `src/app/api/configuracoes/jornada/route.ts`; the available balance is generated hours minus recorded uses, clamped at zero. The calculation is implemented in `src/app/api/horas-extras/disponivel/route.ts` and repeated in the overtime usage API handlers. Keep all implementations consistent when changing this behavior.
+Extra hours are computed from the day's summed work intervals, applying the account's `User.dailyTargetMinutes` baseline to each day. Existing accounts receive the eight-hour default (480 minutes). The daily target API is `src/app/api/configuracoes/jornada/route.ts`; the available balance is generated hours minus recorded uses, clamped at zero. `src/lib/overtime.ts` owns the calculation, shared by the balance and usage handlers and the scheduled task. Sum whole minutes before converting to decimal hours. When editing usage, the caller excludes that record from the usage aggregate and preserves the existing amount as the minimum allowed ceiling after a target change. Run `npm test` for calculation and handler regression coverage.
 
 `extra_hours_usage.hours_used` is stored in decimal hours. The interface accepts decimal values or `hours:minutes` input and converts the latter before submitting.
 

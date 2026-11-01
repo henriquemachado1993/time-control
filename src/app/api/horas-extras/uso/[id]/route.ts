@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOvertime } from "@/lib/overtime";
 
 // PUT - Atualizar uso de horas extras
 export async function PUT(
@@ -47,38 +48,6 @@ export async function PUT(
       orderBy: { date: "asc" },
     });
 
-    // Calcular horas trabalhadas por dia (agrupar sessões)
-    const workedHoursByDate: { [key: string]: number } = {};
-
-    workHours.forEach(hour => {
-      if (!hour.end_time) return;
-
-      const start = new Date(`2000-01-01T${hour.start_time}`);
-      const end = new Date(`2000-01-01T${hour.end_time}`);
-      const workedMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-      const workedHours = workedMinutes / 60;
-
-      if (!workedHoursByDate[hour.date]) {
-        workedHoursByDate[hour.date] = 0;
-      }
-      workedHoursByDate[hour.date] += workedHours;
-    });
-
-    // Calcular horas extras baseadas no total diário
-    const extraHoursByDate: { [key: string]: number } = {};
-
-    for (const [date, totalWorkedHours] of Object.entries(workedHoursByDate)) {
-      const standardHours = user.dailyTargetMinutes / 60;
-      const extraHours = Math.max(0, totalWorkedHours - standardHours);
-
-      if (extraHours > 0) {
-        extraHoursByDate[date] = extraHours;
-      }
-    }
-
-    const totalExtraHoursGenerated = Object.values(extraHoursByDate).reduce((sum, hours) => sum + hours, 0);
-
-    // Calcular horas extras já utilizadas (excluindo o registro atual)
     const usedHours = await prisma.extra_hours_usage.aggregate({
       where: {
         user_id: user.id,
@@ -87,8 +56,8 @@ export async function PUT(
       _sum: { hours_used: true }
     });
 
-    const totalUsedHours = usedHours._sum.hours_used || 0;
-    const availableHours = totalExtraHoursGenerated - totalUsedHours;
+    const bank = calculateOvertime(workHours, user.dailyTargetMinutes, usedHours._sum.hours_used ?? 0);
+    const availableHours = bank.available;
 
     const maxAllowedHours = Math.max(availableHours, existingUsage.hours_used);
     if (hours_used > maxAllowedHours) {

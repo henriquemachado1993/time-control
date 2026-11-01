@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOvertime } from "@/lib/overtime";
 
 // GET - Calcular horas extras disponíveis automaticamente
 export async function GET() {
@@ -26,53 +27,13 @@ export async function GET() {
       orderBy: { date: "asc" },
     });
 
-    // Calcular horas trabalhadas por dia (agrupar sessões)
-    const workedHoursByDate: { [key: string]: number } = {};
-
-    workHours.forEach(hour => {
-      if (!hour.end_time) return;
-
-      const start = new Date(`2000-01-01T${hour.start_time}`);
-      const end = new Date(`2000-01-01T${hour.end_time}`);
-      const workedMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-      const workedHours = workedMinutes / 60;
-
-      if (!workedHoursByDate[hour.date]) {
-        workedHoursByDate[hour.date] = 0;
-      }
-      workedHoursByDate[hour.date] += workedHours;
-    });
-
-    // Calcular horas extras baseadas no total diário
-    const extraHoursByDate: { [key: string]: number } = {};
-
-    for (const [date, totalWorkedHours] of Object.entries(workedHoursByDate)) {
-      const standardHours = user.dailyTargetMinutes / 60;
-      const extraHours = Math.max(0, totalWorkedHours - standardHours);
-
-      if (extraHours > 0) {
-        extraHoursByDate[date] = extraHours;
-      }
-    }
-
-    // Calcular total de horas extras geradas
-    const totalExtraHoursGenerated = Object.values(extraHoursByDate).reduce((sum, hours) => sum + hours, 0);
-
-    // Calcular horas extras já utilizadas
     const usedHours = await prisma.extra_hours_usage.aggregate({
       where: { user_id: user.id },
       _sum: { hours_used: true }
     });
 
-    const totalUsedHours = usedHours._sum.hours_used || 0;
-    const availableHours = totalExtraHoursGenerated - totalUsedHours;
-
-    return NextResponse.json({
-      total_generated: totalExtraHoursGenerated,
-      total_used: totalUsedHours,
-      available: Math.max(0, availableHours),
-      breakdown_by_date: extraHoursByDate
-    });
+    const bank = calculateOvertime(workHours, user.dailyTargetMinutes, usedHours._sum.hours_used ?? 0);
+    return NextResponse.json(bank);
 
   } catch (error) {
     console.error("Erro ao calcular horas extras disponíveis:", error);
